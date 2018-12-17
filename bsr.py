@@ -10,13 +10,13 @@ import requests
 from datetime import datetime, timedelta
 from time import mktime
 import time as myTime
-import locale
-try:
-    locale.setlocale(locale.LC_ALL, "de_DE.utf8")
-    # locale.setlocale(locale.LC_TIME, "de") # german
-except locale.Error:
-    Domoticz.Error("Cannot set locale.")
 import urllib
+# import locale
+# try:
+#    locale.setlocale(locale.LC_ALL, "de_DE.utf8")
+#    # locale.setlocale(locale.LC_TIME, "de") # german
+# except locale.Error:
+#    Domoticz.Error("Cannot set locale.")
 
 try:
     import Domoticz
@@ -118,9 +118,7 @@ class Bsr:
     def reset(self):
         '''set all importent fields to None
         '''
-
         self.nearest = None
-
         self.location = None
         self.restData = WasteData("Restmuell", Bsr.HOUSEHOLD_CLASS, self.showHouseholdWaste)
         self.recycleData = WasteData("Wertstoffe", Bsr.RECYCLE_CLASS, self.showRecycleWaste)
@@ -130,6 +128,7 @@ class Bsr:
         self.nextCollectionHint = None
         self.observationDate = None
         self.needUpdate = True
+        self.resetError()
 
     def dumpBsrStatus(self):
         '''just print current status to log

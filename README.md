@@ -57,6 +57,7 @@ sys.path.append('/usr/lib/python3/dist-packages')
     -  Debug: if True, the log will be hold a lot more output.
   
 ## Bugs and ToDos
+- using Locale for dates,months, days ... works good on windows, breaks on linux
 - Weihnachtsbaum, they are special
 - add feature to create summary device or/and device per type
 - own alarm pictures matching the waste type
