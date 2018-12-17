@@ -1,6 +1,7 @@
 # domoticz-BSR
 Domoticz plugin that gets data of public waste collection for Berlin from the website of the [Berliner Stadtreinigungsbetriebe](http://www.bsr.de/).
 
+![settings](https://github.com/belzetrigger/domoticz-BSR/raw/master/resources/unit_all_warning.PNG)
 
 ## Summary
 This is a virtual hardware plugin that adds information about collecting days  from [bsr.de](https://www.bsr.de/abfuhrkalender-20520.php)  to your [Domoticz](https://www.domoticz.com/) interface. 
@@ -42,7 +43,8 @@ sys.path.append('/usr/lib/python3/dist-packages')
    - remember exactly the streetname found for your address. Eg 'Kochstr.' instead of 'Kochstrasse'
    - if recycling is not collected at your house number, try the neighbors.  eg. using 10 instead of 10f
 
-Add Picutre!!!
+![settings](https://github.com/belzetrigger/domoticz-BSR/raw/master/resources/settings.PNG)
+
 
     - Street:
     - Zip code:
@@ -56,7 +58,8 @@ Add Picutre!!!
   
 ## Bugs and ToDos
 - Weihnachtsbaum, they are special
-- Pictures
+- add feature to create summary device or/and device per type
+- own alarm pictures matching the waste type
 - Street names often have just "...str." not "....strasse" 
 - similar street names within same zip code eg: 
     - Am Falkenberg 
