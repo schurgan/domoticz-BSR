@@ -48,14 +48,14 @@ class WasteData:
         return "{} {}".format(self.wasteDate, self.wasteHint)
 
     def getLongStatus(self):
-        d = "-"
+        d = "- kein -"
         if(self.wasteDate is not None):
-            d = "{:%Y-%b-%d %a}: ".format(self.wasteDate)      
+            d = "{:%Y-%b-%d %a}: ".format(self.wasteDate)
         return "{} {} {}".format(
-         d,
-         # '-' if self.wasteDate is None else self.wasteDate,
-         self.wasteType,
-         '' if self.wasteHint is None else "(" + self.wasteHint + ")")
+            d,
+            # '-' if self.wasteDate is None else self.wasteDate,
+            self.wasteType,
+            '' if self.wasteHint is None else "(" + self.wasteHint + ")")
 
     def isComplete(self):
         return (self.wasteDate is None and self.show is False) or self.wasteDate is not None
@@ -123,15 +123,8 @@ class Bsr:
 
         self.location = None
         self.restData = WasteData("Restmuell", Bsr.HOUSEHOLD_CLASS, self.showHouseholdWaste)
-        #  self.nextWasteCollectionDate = None
-        #  self.nextWasteCollectionHint = None
         self.recycleData = WasteData("Wertstoffe", Bsr.RECYCLE_CLASS, self.showRecycleWaste)
-        # self.nextRecycleCollectionDate = None
-        # self.nextRecycleCollectionHint = None
         self.bioData = WasteData("Bio", Bsr.BIO_CLASS, self.showBioWaste)
-
-        # self.nextBioCollectionDate = None
-        # self.nextBioCollectionHint = None
         self.nextCollectionDate = None
         self.nextCollectionName = None
         self.nextCollectionHint = None
@@ -152,8 +145,6 @@ class Bsr:
             .format(
                 self.location,
                 self.restData.getShortStatus(),
-                # self.nextWasteCollectionDate,
-                # self.nextWasteCollectionHint,
                 self.recycleData.getShortStatus(),
                 self.bioData.getShortStatus(),
                 self.nextCollectionDate,
@@ -195,11 +186,6 @@ class Bsr:
         return s
 
     def getNearestDate(self):
-        # dt1 = self.restData.getDate()
-        # dt2 = self.recycleData.getDate()
-        # dt3 = self.bioData.getDate()
-        # #dtm = min((strptime(dt, "%Y/%m/%d") for dt in (dt1, dt2, dt3) if dt))
-        # dtm = max(dt for dt in (dt1, dt2, dt3) if dt)
         d = None
         if(self.nearest is not None):
             d = self.nearest.getDate()
@@ -208,7 +194,6 @@ class Bsr:
     def checkForNearest(self, dt: WasteData):
         '''takes given data and put in store, if this on is importent for alarm levelself.
         therefore search for smallest date.
-        
         Arguments:
             dt {WasteData} -- the data to verify
         '''
@@ -235,12 +220,11 @@ class Bsr:
             customObjects.append(self.bioData)
         # One line sort function method using an inline lambda function lambda x: x.date
         # The value for the key param needs to be a value that identifies the sorting property on the object
-        customObjects.sort(key=lambda x: x.wasteDate 
-        if(x and x.wasteDate) else datetime.now().date()
-        , reverse=False)
+        customObjects.sort(key=lambda x: x.wasteDate
+            if(x and x.wasteDate) else datetime.now().date(), reverse=False)
         for obj in customObjects:
             Domoticz.Debug("Sorted: " + str(obj.wasteDate) + ":  " + obj.wasteType)
-            summary = summary + obj.getLongStatus() + seperator   
+            summary = summary + obj.getLongStatus() + seperator
         return summary
 
 # check which date is smaller
@@ -448,7 +432,7 @@ class Bsr:
                     convert4Query(relevantNumber["Street"]),
                     relevantNumber["HouseNo"]
                 )
-            #Domoticz.Debug("data: {}".format(data))
+            # Domoticz.Debug("data: {}".format(data))
             r = s.post(url, data=data, headers=headers)
             Domoticz.Debug('BSR: #4 Parse Data')
 
@@ -462,50 +446,11 @@ class Bsr:
             if(error is not None):
                 Domoticz.Log("Could not load waste collection data. Raise exception")
                 self.setError(error)
-                raise Exception("Could not load data - verifiy settings") 
+                raise Exception("Could not load data - verifiy settings")
             else:
                 self.resetError()
             for tag in soup.find_all("li"):
-                
                 Domoticz.Log('BSR: #4.3\t {} - {} '.format(tag.time.get('datetime'), tag.img.get('alt')))
-                # Domoticz.Debug("{0}: {1}".format(tag.name, tag.text))
-                if isFirst is True:
-                    # self.nextCollectionDate = tag.time.get('datetime')
-                    # self.nextCollectionName = tag.img.get('alt')
-                    # hint = tag.find('span', {'class': 'Hinweis'})
-                    # if(hint is not None):
-                    #     # Domoticz.Debug("Hinweis: {} ".format(hint['title']))
-                    #     self.nextCollectionHint = hint['title']
-                    
-                    #result = parseBsrHtmlList(tag)
-                    #self.nextCollectionDate = result[0]
-                    #self.nextCollectionName = result[1]
-                    #self.nextCollectionHint = result[2]
-                    isFirst = False
-
-                # if we should search for recycle, and if we not already have one
-                # if self.showRecycleWaste is True \
-                #         and tag.find('span', {'class': 'Restmuell'}) is not None\
-                #         and self.nextRecycleCollectionDate is None:
-                #     # wertStoffDate = tag.time.get('datetime')
-                #     # self.nextRecycleCollectionDate = datetime.strptime(wertStoffDate, '%Y-%m-%d').date()
-                #     # hint = tag.find('span', {'class': 'Hinweis'})
-                #     # if(hint is not None):
-                #     #    # Domoticz.Debug("Hinweis: {} ".format(hint['title']))
-                #     #    self.nextWasteCollectionHint = hint['title']
-                #     result = parseBsrHtmlList(tag)
-                #     self.nextRecycleCollectionDate = result[0]
-                #     self.nextRecycleCollectionHint = result[2]
-
-                # if we should show waste and if we do not have on
-                # if self.showHouseholdWaste is True \
-                #         and tag.find('span', {'class': 'Restmuell'}) is not None\
-                #         and self.nextWasteCollectionDate is None:
-
-                #     result = parseBsrHtmlList(tag)
-                #     self.nextWasteCollectionDate = result[0]
-                #     self.nextWasteCollectionHint = result[2]
-
                 if self.showHouseholdWaste is True:
                     scanAndParse(tag, self.restData)
                     self.checkForNearest(self.restData)
@@ -577,7 +522,6 @@ def scanAndParse(tag, wasteData: WasteData):
                 Domoticz.Debug("Result was empty?!")
         except Exception as e:
             Domoticz.Error("Could not parse content -> data {}\tresult {} ... exc: {} ".format(wasteData, result, e))
-                  
     return wasteData
 
 
@@ -586,7 +530,6 @@ def parseBsrHtmlList(tag):
     colName = tag.img.get('alt')
     Domoticz.Debug("colName {}".format(colName))
     colHint = tag.find('span', {'class': 'Hinweis'})
-    
     if(colHint is not None):
         # Domoticz.Debug("Hinweis: {} ".format(hint['title']))
         colHint = colHint['title']
@@ -595,22 +538,19 @@ def parseBsrHtmlList(tag):
 
     colDate = tag.time.get('datetime')
     Domoticz.Debug("colDate1 {}".format(colDate))
-    
     colDate = getDate(colDate, '%Y-%m-%d')
     result = [colDate, colName, colHint]
     return result
 
 
 def getDate(sDate: str, sFormat: str):
-    """Parse string to date object. 
+    """Parse string to date object.
     Trying it with datetime.strptime or time.strptime
     Helps walking around different domoticz behaviour between
-    start up and update. 
-    
+    start up and update.
     Arguments:
         sDate {str} -- the date as string
         sFormat {str} -- format eg. '%Y-%m-%d'
-    
     Returns:
         [date] -- none or the date object
     """
@@ -623,22 +563,20 @@ def getDate(sDate: str, sFormat: str):
 
 
 def getDatetime(sDate: str, sFormat: str):
-    """Parse string to datetime object. 
+    """Parse string to datetime object.
         Trying it with datetime.strptime or time.strptime
     Helps walking around different domoticz behaviour between
-    start up and update. 
-    
+    start up and update.
     Arguments:
         sDate {str} -- the date as string
         sFormat {str} -- format eg. '%Y-%m-%d'
-    
     Returns:
         [datetime] -- none or the datetime object
     """
     dt = None
     myDate = None
     try:
-        dt = datetime.strptime(sDate, sFormat)       
+        dt = datetime.strptime(sDate, sFormat)
     except TypeError:
         dt = datetime(*(myTime.strptime(sDate, sFormat)[0:6]))
     return dt
