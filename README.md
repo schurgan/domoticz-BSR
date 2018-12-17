@@ -1,5 +1,5 @@
 # domoticz-BSR
-Domoticz plugin that gets data of public waste collection for Berlin from the website of the [bsr.de](http://www.bsr.de/).
+Domoticz plugin that gets data of public waste collection for Berlin from the website of the [Berliner Stadtreinigungsbetriebe](http://www.bsr.de/).
 
 
 ## Summary
