@@ -9,51 +9,57 @@ lat_be = 52.516667
 lon_be = 13.416667
 
 
-print("#################################")
-# test umlaute and spaces
-y = Bsr("Am Schülerheim", "14195", "4")
-y.readBsrWasteCollection()
-y.dumpBsrStatus()
-print("#################################")
-# test multiple streets for zip code
-y = Bsr("Am Falkenberg", "12524", "1")
-# y = Bsr("de", "Am Falkenberg am Wasserwerk", "12524", "1")
+def createTestUmalute():
+    print("#################################")
+    print("Test Umlaute")
+    y = Bsr("Am Schülerheim", "14195", "4")
+    return y
 
-# test bio
-print("#################################")
-# kein wertstoffe
-y = Bsr("Barfusstr.", "13349", "1", showRecycleWaste=False)
-y.dumpBsrConfig()
-y.readBsrWasteCollection()
-y.dumpBsrStatus()
-print("date: {} level:{} txt: {} name: {}".format(y.getNearestDate(),
-                                                  y.getAlarmLevel(), y.getAlarmText(),
-                                                  y.getDeviceName()))
 
-# test like plugin default
-print("#################################")
-# kein wertstoffe
-y = Bsr("Deeper Pfad", "13503", "1",
-        showHouseholdWaste=True,
-        showRecycleWaste=False, showBioWaste=False)
-y.dumpBsrConfig()
-y.readBsrWasteCollection()
-y.dumpBsrStatus()
-print("date: {} level:{} txt: {} name: {}".format(y.getNearestDate(),
-                                                  y.getAlarmLevel(), y.getAlarmText(),
-                                                  y.getDeviceName()))
+def creatTestMultiple():
+    print("#################################")
+    print("Test Multiple")
+    y = Bsr("Am Falkenberg", "12524", "1")
+    # y = Bsr("de", "Am Falkenberg am Wasserwerk", "12524", "1")
+    return y
 
-# test bio, rest, recycling
-print("#################################")
-# kein wertstoffe
-y = Bsr("Germanenstr", "13156", "21",
-        showHouseholdWaste=True,
-        showRecycleWaste=True, showBioWaste=True)
-y.dumpBsrConfig()
-y.readBsrWasteCollection()
-y.dumpBsrStatus()
-# print("date: {} level:{} txt: {} name: {}".format(y.getNearestDate(),
-#                                                  y.getAlarmLevel(), y.getAlarmText(),
-#                                                  y.getDeviceName()))
-# y.readBsrWasteCollection()
-print("summary: {}".format(y.getSummary()))
+
+def creatTestBio():
+    print("#################################")
+    print("Test Bio")
+    y = Bsr("Barfusstr.", "13349", "1", showRecycleWaste=False)
+    return y
+
+
+def creatTestLikePlugin():
+            # test like plugin default
+    print("#################################")
+    print("Test like plugin")
+    # kein wertstoffe
+    y = Bsr("Deeper Pfad", "13503", "1",
+            showHouseholdWaste=True,
+            showRecycleWaste=False, showBioWaste=False)
+    return y
+
+
+def runTest(bsr: Bsr):
+    bsr.dumpBsrConfig()
+    bsr.readBsrWasteCollection()
+    bsr.dumpBsrStatus()
+    bsr.dumpBsrStatus()
+    print("date: {} level:{} txt: {} name: {}".format(y.getNearestDate(),
+                                                      y.getAlarmLevel(), y.getAlarmText(),
+                                                      y.getDeviceName()))
+
+
+y = createTestUmalute()
+runTest(y)
+
+y = creatTestMultiple()
+runTest(y)
+
+b = creatTestBio()
+runTest(b)
+
+d = creatTestLikePlugin()
+runTest(d)

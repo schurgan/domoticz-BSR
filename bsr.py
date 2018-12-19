@@ -255,9 +255,6 @@ class Bsr:
             Domoticz.Debug('Retrieve waste collection data from ' + self.bsrUrl)
 
             r = requests.get('https://www.bsr.de/abfuhrkalender-20520.php')
-            # cookie = {'PHPSESSID': r.cookies['PHPSESSID']}
-            # Domoticz.Debug('BSR-R: ' + str(r) )
-            # Domoticz.Debug('BSR-C: ' + str(cookie) )
             url = 'https://www.bsr.de/abfuhrkalender_ajax.php?script=dynamic_kalender_ajax'
             formdata = {'abf_strasse': 'Germanenstr.',
                         'abf_hausnr': '30D',
@@ -271,29 +268,10 @@ class Bsr:
                         'abf_datepicker': '30.10.2018',
                         'listitems': '7'}
 
-            # &abf_strasse=Germanenstr.&abf_hausnr=30D&tab_control&abf_config_weihnachtsbaeume=&abf_config_restmuell=on&abf_config_biogut=on&abf_config_wertstoffe=on&abf_config_laubtonne=on&abf_selectmonth=11+2018&abf_datepicker=04.11.2018&listitems=1'
-            # r# = requests.post(url, data = {'key':'value'}, cookies=cookie)
-            # Domoticz.Debug( str(r.content) )
-
             s = requests.Session()
             s.get('https://www.bsr.de/abfuhrkalender-20520.php')
 
             # 1: get street
-            # curl 'https://www.bsr.de/abfuhrkalender_ajax.php?script=dynamic_search&step=1&q=germ'
-            # -H 'Cookie: PHPSESSID=qtucu41smjm7cds15e695bss7osrcs5lrk1gmaco4j3a5uquq0f0; wt3_sid=%3B957773728431957;
-            # wt_geid=pafDLBVIxBmgcvpffYJ5AkIF; wt_fweid=33fea4fb382763f39c51b3f4;
-            # wt_feid=e7e07c85af0a2b503bb2e61fd8ffd3ac; wt_cdbeid=8c641c5c2fa74d82b14a4906fc58c6ff;
-            # cookieconsent_status=dismiss; wt3_eid=%3B957773728431957%7C2154141380200060818%232154141441800946412'
-            # -H 'Accept-Encoding: gzip, deflate, br'
-            # -H 'Accept-Language: de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7'
-            # -H 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko)
-            # Chrome/69.0.3497.100 Safari/537.36'
-            # -H 'Accept: application/json, text/javascript, */*; q=0.01'
-            # -H 'Referer: https://www.bsr.de/abfuhrkalender-20520.php'
-            # -H 'X-Requested-With: XMLHttpRequest'
-            # -H 'Connection: keep-alive'
-            # --compressed
-
             url = 'https://www.bsr.de/abfuhrkalender_ajax.php?script=dynamic_search&step=1&q={}'.format(self.street)
             headers = {
                 'Accept-Encoding': 'gzip, deflate, br',
@@ -323,32 +301,12 @@ class Bsr:
             if relevantStreet is None:
                 raise Exception("Did not find a relevant street")
             # transform to bst like street
-            # bsrParamRelvStreet = relevantStreet["value"].replace(" ", "%20")
             bsrParamRelvStreet = convertUrl(relevantStreet["value"])
 
-            # bsrQueryRelvStreet = relevantStreet["value"].replace(",", "%2C").replace(" ", "+")
             bsrQueryRelvStreet = convert4Query(relevantStreet["value"])
             Domoticz.Debug("using for bsr street:\t'{}'\t'{}'".format(bsrParamRelvStreet, bsrQueryRelvStreet))
+          
             # 2: get house number
-            # curl 'https://www.bsr.de/abfuhrkalender_ajax.php?
-            # script=dynamic_search&step=2&q=Germanenstr.,%2013156%20Berlin%20(Pankow)'
-            # -H 'Cookie: PHPSESSID=qtucu41smjm7cds15e695bss7osrcs5lrk1gmaco4j3a5uquq0f0;
-            # wt3_sid=%3B957773728431957; wt_geid=pafDLBVIxBmgcvpffYJ5AkIF;
-            # wt_fweid=33fea4fb382763f39c51b3f4; wt_feid=e7e07c85af0a2b503bb2e61fd8ffd3ac;
-            # wt_cdbeid=8c641c5c2fa74d82b14a4906fc58c6ff; cookieconsent_status=dismiss;
-            # wt3_eid=%3B957773728431957%7C2154141380200060818%232154141441800946412'
-            # -H 'Origin: https://www.bsr.de'
-            # -H 'Accept-Encoding: gzip, deflate, br'
-            # -H 'Accept-Language: de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7'
-            # -H 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36
-            # (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
-            # -H 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8'
-            # -H 'Accept: */*'
-            # -H 'Referer: https://www.bsr.de/abfuhrkalender-20520.php'
-            # -H 'X-Requested-With: XMLHttpRequest'
-            # -H 'Connection: keep-alive'
-            # --data 'step=2&q=Germanenstr.%2C+13156+Berlin+(Pankow)'
-            # --compressed
             url = 'https://www.bsr.de/abfuhrkalender_ajax.php?'\
                 'script=dynamic_search&step=2&q={}'.format(bsrParamRelvStreet)
             headers = {
@@ -384,29 +342,6 @@ class Bsr:
 
             if relevantNumber is None:
                 raise Exception("Did not find a relevant number")
-
-            # curl 'https://www.bsr.de/abfuhrkalender_ajax.php?script=dynamic_kalender_ajax'
-            # -H 'Cookie: PHPSESSID=qtucu41smjm7cds15e695bss7osrcs5lrk1gmaco4j3a5uquq0f0;
-            # wt3_sid=%3B957773728431957; wt_geid=pafDLBVIxBmgcvpffYJ5AkIF;
-            # wt_fweid=33fea4fb382763f39c51b3f4; wt_feid=e7e07c85af0a2b503bb2e61fd8ffd3ac;
-            # wt_cdbeid=8c641c5c2fa74d82b14a4906fc58c6ff; cookieconsent_status=dismiss;
-            #  wt3_eid=%3B957773728431957%7C2154141380200060818%232154141851600765596'
-            # -H 'Origin: https://www.bsr.de'
-            # -H 'Accept-Encoding: gzip, deflate, br'
-            # -H 'Accept-Language: de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7'
-            # -H 'User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36
-            # (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
-            # -H 'Content-Type: application/x-www-form-urlencoded; charset=UTF-8'
-            # -H 'Accept: */*'
-            # -H 'Referer: https://www.bsr.de/abfuhrkalender-20520.php'
-            # -H 'X-Requested-With: XMLHttpRequest'
-            # -H 'Connection: keep-alive'
-            # --data 'abf_strasse=Germanenstr.&abf_hausnr=30&
-            # tab_control=Liste&abf_config_weihnachtsbaeume=&
-            # abf_config_restmuell=on&abf_config_biogut=on&
-            # abf_config_wertstoffe=on&abf_config_laubtonne=on
-            # &abf_selectmonth=11+2018&abf_datepicker=30.10.2018&listitems=7'
-            # --compressed
 
             url = 'https://www.bsr.de/abfuhrkalender_ajax.php?script=dynamic_kalender_ajax'
             headers = {
