@@ -42,24 +42,39 @@ def creatTestLikePlugin():
     return y
 
 
+def creatTestXmasLikePlugin():
+            # test like plugin default
+    print("#################################")
+    print("Test like plugin")
+    # kein wertstoffe
+    y = Bsr("Deeper Pfad", "13503", "1",
+            showHouseholdWaste=True,
+            showRecycleWaste=False, showBioWaste=False, showXmasWaste=True)
+    return y
+
+
 def runTest(bsr: Bsr):
     bsr.dumpBsrConfig()
     bsr.readBsrWasteCollection()
+   # bsr.dumpBsrStatus()
     bsr.dumpBsrStatus()
-    bsr.dumpBsrStatus()
-    print("date: {} level:{} txt: {} name: {}".format(y.getNearestDate(),
-                                                      y.getAlarmLevel(), y.getAlarmText(),
-                                                      y.getDeviceName()))
+    print("summary: {}".format(bsr.getSummary()))
+    print("date: {} \nlevel:{} \ntxt: {} \nname: {}".format(bsr.getNearestDate(),
+                                                            bsr.getAlarmLevel(), bsr.getAlarmText(),
+                                                            bsr.getDeviceName()))
 
 
-y = createTestUmalute()
-runTest(y)
+# y = createTestUmalute()
+# runTest(y)
 
-y = creatTestMultiple()
-runTest(y)
+# y = creatTestMultiple()
+# runTest(y)
 
-b = creatTestBio()
-runTest(b)
+# b = creatTestBio()
+# runTest(b)
 
-d = creatTestLikePlugin()
-runTest(d)
+# d = creatTestLikePlugin()
+# runTest(d)
+
+e = creatTestXmasLikePlugin()
+runTest(e)

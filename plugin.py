@@ -1,24 +1,3 @@
-import datetime as dt
-import json
-import re
-import sys
-import urllib.error
-import urllib.request
-from datetime import datetime, timedelta
-from math import asin, cos, radians, sin, sqrt
-from os import path
-import sys
-sys.path
-sys.path.append('/usr/lib/python3/dist-packages')
-sys.path.append('/volume1/@appstore/py3k/usr/local/lib/python3.5/site-packages')
-sys.path.append('C:\\Program Files (x86)\\Python37-32\\Lib\\site-packages')
-
-import feedparser
-from bs4 import BeautifulSoup
-
-from bsr import Bsr
-
-
 """
 Bsr Waste Collection Date Reader Plugin
 
@@ -26,13 +5,14 @@ Author: Belze(2018)
 
 
 Version:    1.0.0: Initial Version
+            1.1.0: add support for xmas trees and more debug options
 """
 """
 
 
 <plugin key="BsrWasteCollection"
 name="BSR - Berlin Waste Collection" author="belze"
-version="1.0.0" wikilink="" >
+version="1.0.1" wikilink="" >
     <params>
         <param field="Mode1" label="Street" width="400px" required="true"
         default="Deeper Pfad"/>
@@ -49,41 +29,51 @@ version="1.0.0" wikilink="" >
                 <option label="only normal waste" value="only_waste"  selected="selected"/>
                 <option label="waste and bio" value="waste_bio"/>
                 <option label="waste and recycling" value="waste_recycling"   />
+                <option label="waste, recycling and xmas" value="waste_recycling_xmas"   />
                 <option label="waste, bio and recycling" value="waste_recycling_bio"   />
+                <option label="waste, bio, recycling, xmas" value="waste_recycling_bio_xmas"   />
             </options>
         </param>
         <param field="Mode6" label="Debug" width="75px">
             <options>
                 <option label="True" value="Debug"/>
                 <option label="False" value="Normal"  default="False" />
+                <option label="True full deatail" value="Debug_response"   />
+
             </options>
         </param>
-        <param field="Mode7" label="Test" width="75px">
+        <param field="Mode7" label="Xmas Tree" width="75px">
             <options>
-                <option label="True" value="Debug"/>
-                <option label="False" value="Normal"  default="False" />
+                <option label="True" value="True"/>
+                <option label="False" value="False"  default="False" />
             </options>
         </param>
     </params>
 </plugin>
 """
-
+import datetime as dt
+import json
+import re
+import sys
+import urllib.error
+import urllib.request
+from datetime import datetime, timedelta
+from math import asin, cos, radians, sin, sqrt
+from os import path
+import sys
+sys.path
+sys.path.append('/volume1/@appstore/py3k/usr/local/lib/python3.5/site-packages')
+sys.path.append('C:\\Program Files (x86)\\Python37-32\\Lib\\site-packages')
 
 try:
     import Domoticz
 except ImportError:
     import fakeDomoticz as Domoticz
 
-sys.path
-sys.path.append('/usr/lib/python3/dist-packages')
-sys.path.append('/volume1/@appstore/py3k/usr/local/lib/python3.5/site-packages')
-sys.path.append('C:\\Program Files (x86)\\Python37-32\\Lib\\site-packages')
-
-
-# from unidecode import unidecode
-
-
-# from unidecode import unidecode
+try:
+    from bsr import Bsr
+except Exception as e:
+    pass
 
 
 class BasePlugin:
@@ -96,7 +86,7 @@ class BasePlugin:
         return
 
     def onStart(self):
-        if Parameters["Mode6"] == 'Debug':
+        if 'Debug' in Parameters["Mode6"]:
             self.debug = True
             Domoticz.Debugging(1)
             DumpConfigToLog()
@@ -144,8 +134,18 @@ class BasePlugin:
         else:
             self.showRecycle = False
 
+        if("xmas" in Parameters["Mode5"]):
+            self.showXmas = True
+        else:
+            self.showXmas = False
+
+        if("response" in Parameters["Mode6"]):
+            self.debugResponse = True
+        else:
+            self.debugResponse = False
+
         self.bsr = Bsr(self.street, self.zip, self.nr, self.showWaste,
-                       self.showRecycle, self.showBio)
+                       self.showRecycle, self.showBio, showXmasWaste=self.showXmas, debugResponse=self.debugResponse)
         if self.debug is True:
             self.bsr.dumpBsrConfig()
 
@@ -153,7 +153,7 @@ class BasePlugin:
         createDevices()
 
         # init with empty data
-        updateDevice(1, 0, "No Data")
+        updateDevice(1, 0, "No Data", "BSR")
 
     def onStop(self):
         Domoticz.Debug("onStop called")
@@ -164,14 +164,38 @@ class BasePlugin:
             "onCommand called for Unit " + str(Unit) + ": Parameter '" + str(Command) + "', Level: " + str(Level))
 
     def onHeartbeat(self):
+        modulename = 'bs4'
+        if modulename not in sys.modules:
+            Domoticz.Log('{} not imported'.format(modulename))
+        else:
+            Domoticz.Log('{}: {}'.format(modulename, sys.modules[modulename]))
+
         myNow = datetime.now()
         if myNow >= self.nextpoll:
             Domoticz.Debug("----------------------------------------------------")
             self.nextpoll = myNow + timedelta(seconds=self.pollinterval)
             self.bsr.readBsrWasteCollection()
+
+            alarmLevel = 0
+            summary = 'No data'
+            name = 'BSR'
+
+            if(self.bsr.hasError is True):
+                alarmLevel = 4
+                summary = "msg: {}".format(self.bsr.errorMsg)
+                name = '!BSR Error!'
+                updateDevice(1, alarmLevel, summary, name)
+            else:
+                # check if update needed
+                if self.bsr.needUpdate is True:
+                    alarmLevel = self.bsr.getAlarmLevel()
+                    summary = self.bsr.getSummary()
+                    name = self.bsr.getDeviceName()
+                    updateDevice(1, alarmLevel, summary, name)
+
             # check if
-            if self.bsr.needUpdate is True:
-                updateDevice(1, self.bsr.getAlarmLevel(), self.bsr.getSummary(), self.bsr.getDeviceName())
+            # if self.bsr.needUpdate is True:
+            #    updateDevice(1, self.bsr.getAlarmLevel(), self.bsr.getSummary(), self.bsr.getDeviceName())
             Domoticz.Debug("----------------------------------------------------")
 
 
