@@ -6,13 +6,31 @@ Author: Belze(2018)
 
 Version:    1.0.0: Initial Version
             1.1.0: add support for xmas trees and more debug options
+            1.1.1 now xmas tree collection date is only shown in December and January
 """
 """
 
 
 <plugin key="BsrWasteCollection"
 name="BSR - Berlin Waste Collection" author="belze"
-version="1.0.1" wikilink="" >
+version="1.1.1" wikilink="" externallink="https://github.com/belzetrigger/domoticz-BSR" >
+    <description>
+        <h2>BSR - Berlin Waste Collection Plugin</h2><br/>
+        <h3>Features</h3>
+        <ul style="list-style-type:square">
+            <li>shows next dates of selected waste collections</li>
+            <li>using alarm device to signal how close the next collection is</li>
+            <li>if problems occur - device shows it</li>
+        </ul>
+        <h3>Devices</h3>
+        <ul style="list-style-type:square">
+            <li>BSR - Alarm device to show data</li>
+        </ul>
+        <h3>Tipp</h3>
+        Best is visit first -><a href:="https://www.bsr.de/abfuhrkalender-20520.php">
+        BSR </a> to verify your address.
+    </description>
+
     <params>
         <param field="Mode1" label="Street" width="400px" required="true"
         default="Deeper Pfad"/>
@@ -39,13 +57,6 @@ version="1.0.1" wikilink="" >
                 <option label="True" value="Debug"/>
                 <option label="False" value="Normal"  default="False" />
                 <option label="True full deatail" value="Debug_response"   />
-
-            </options>
-        </param>
-        <param field="Mode7" label="Xmas Tree" width="75px">
-            <options>
-                <option label="True" value="True"/>
-                <option label="False" value="False"  default="False" />
             </options>
         </param>
     </params>

@@ -247,6 +247,17 @@ class Bsr:
             if(dt.getDate() < self.nearest.getDate()):
                 self.nearest = dt
 
+    def timeToShowXms(self):
+        '''checks if it's time to show xmas tree collection dataself.
+           It must be December or January.
+        Returns:
+            bool -- True or False
+        '''
+        if(datetime.now().month == 12 or datetime.now().month == 1):
+            return True
+        else:
+            return False
+
     def getSummary(self, seperator: str = '<br>'):
 
         customObjects = []
@@ -257,7 +268,7 @@ class Bsr:
             customObjects.append(self.recycleData)
         if self.showBioWaste:
             customObjects.append(self.bioData)
-        if self.showXmasWaste:
+        if self.showXmasWaste is True and self.timeToShowXms() is True:
             customObjects.append(self.xmasData)
 
         # One line sort function method using an inline lambda function lambda x: x.date
@@ -443,137 +454,6 @@ class Bsr:
 
         try:
             # Domoticz.Debug('Retrieve waste collection data from ' + self.bsrUrl)
-
-            # r = requests.get('https://www.bsr.de/abfuhrkalender-20520.php')
-            # url = 'https://www.bsr.de/abfuhrkalender_ajax.php?script=dynamic_kalender_ajax'
-            # formdata = {'abf_strasse': 'Germanenstr.',
-            #             'abf_hausnr': '30D',
-            #             'tab_control': 'Liste',
-            #             'abf_config_weihnachtsbaeume': '',
-            #             'abf_config_restmuell': 'on',
-            #             'abf_config_biogut': 'on',
-            #             'abf_config_wertstoffe': 'on',
-            #             'abf_config_laubtonne': 'on',
-            #             'abf_selectmonth': '11+2018',
-            #             'abf_datepicker': '30.10.2018',
-            #             'listitems': '7'}
-
-            # s = requests.Session()
-            # s.get('https://www.bsr.de/abfuhrkalender-20520.php')
-
-            # # 1: get street
-            # url = 'https://www.bsr.de/abfuhrkalender_ajax.php?script=dynamic_search&step=1&q={}'.format(self.street)
-            # headers = {
-            #     'Accept-Encoding': 'gzip, deflate, br',
-            #     'Accept-Language': 'de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7',
-            #     'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) '
-            #     'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36',
-            #     'Accept': 'application/json, text/javascript, */*; q=0.01',
-            #     'Referer': 'https://www.bsr.de/abfuhrkalender-20520.php'
-            # }
-            # r = s.post(url, headers=headers)
-            # data = r.json()
-            # Domoticz.Debug('BSR: #2 working Streets:\t')
-            # relevantStreet = None
-
-            # if len(data) > 1:
-            #     Domoticz.Log("Found more than one street - try to guess ...")
-            #     for street in data:
-            #         # TODO wenn mehrere Strassen mit selber plz go deeper, check name
-            #         if(self.zip in street['value']):
-            #             relevantStreet = street
-            #             Domoticz.Debug("found street:\t{}".format(street))
-            #             break
-
-            # else:
-            #     relevantStreet = data[0]
-
-            # if relevantStreet is None:
-            #     raise Exception("Did not find a relevant street")
-            # # transform to bst like street
-            # bsrParamRelvStreet = convertUrl(relevantStreet["value"])
-
-            # bsrQueryRelvStreet = convert4Query(relevantStreet["value"])
-            # Domoticz.Debug("using for bsr street:\t'{}'\t'{}'".format(bsrParamRelvStreet, bsrQueryRelvStreet))
-          
-            # # 2: get house number
-            # url = 'https://www.bsr.de/abfuhrkalender_ajax.php?'\
-            #     'script=dynamic_search&step=2&q={}'.format(bsrParamRelvStreet)
-            # headers = {
-            #     'Accept-Encoding': 'gzip, deflate, br',
-            #     'Accept-Language': 'de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7',
-            #     'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) '
-            #     'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36',
-            #     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            #     'Accept': '*/*',
-            #     'Referer': 'https://www.bsr.de/abfuhrkalender-20520.php'
-            # }
-            # formdata = {
-            #     'step': '2',
-            #     'q': bsrQueryRelvStreet
-            # }
-            # r = s.post(url, headers=headers)
-            # json = r.json()
-            # Domoticz.Debug('BSR: #3 Numbers:\t')
-            # relevantNumber = None
-
-            # if len(json) > 1:
-            #     Domoticz.Log("Found more than one number - try to guess ...")
-            #     for k, v in json.items():
-            #         #    # for nr in json:
-            #         if(self.number == v['HouseNo']):
-            #             relevantNumber = v
-            #             Domoticz.Debug("found nr:\t{}".format(v))
-            # else:
-            #     items = (list(json.values()))
-            #     first = list(items)[0]
-            #     # Domoticz.Error(first)
-            #     relevantNumber = first
-
-            # if relevantNumber is None:
-            #     raise Exception("Did not find a relevant number")
-
-            # url = 'https://www.bsr.de/abfuhrkalender_ajax.php?script=dynamic_kalender_ajax'
-            # headers = {
-            #     'Accept-Encoding': 'gzip, deflate, br',
-            #     'Accept-Language': 'de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7',
-            #     'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) '
-            #     'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36',
-            #     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            #     'Accept': '*/*',
-            #     'Referer': 'https://www.bsr.de/abfuhrkalender-20520.php'
-            # }
-
-            # data = 'abf_strasse={}&'\
-            #     'abf_hausnr={}&tab_control=Liste&'\
-            #     'abf_config_weihnachtsbaeume=&'\
-            #     'abf_config_restmuell=on&'\
-            #     'abf_config_biogut=on&abf_config_wertstoffe=on&'\
-            #     'abf_config_laubtonne=on&'\
-            #     'abf_selectmonth=12+2018&'\
-            #     'abf_datepicker=11.12.2018'\
-            #     '&listitems=7'.format(
-            #         convert4Query(relevantNumber["Street"]),
-            #         relevantNumber["HouseNo"]
-            #     )
-            # # Domoticz.Debug("data: {}".format(data))
-            # r = s.post(url, data=data, headers=headers)
-
-            # xmas
-            # data = 'abf_strasse={}&'\
-            #     'abf_hausnr={}&tab_control=Liste&'\
-            #     'abf_config_weihnachtsbaeume=on&'\
-            #     'abf_config_restmuell=&'\
-            #     'abf_config_biogut=&abf_config_wertstoffe=on&'\
-            #     'abf_config_laubtonne=&'\
-            #     'abf_selectmonth=12+2018&'\
-            #     'abf_datepicker=11.12.2018'\
-            #     '&listitems=7'.format(
-            #         convert4Query(relevantNumber["Street"]),
-            #         relevantNumber["HouseNo"]
-            #     )
-            # # Domoticz.Debug("data: {}".format(data))
-            # rXmas = s.post(url, data=data, headers=headers)
             r = self.requestWasteData()
             Domoticz.Debug('BSR: #4 Parse Data (without Xmas')
             if(self.debugResponse is True):
@@ -616,7 +496,7 @@ class Bsr:
             Domoticz.Log('BSR: #4.4\t gelber Sack {}\tHausmuell {} '
                          .format(self.recycleData.getDate(), self.restData.getDate()))
 
-            if(self.showXmasWaste):
+            if(self.showXmasWaste and self.timeToShowXms() is True):
                 Domoticz.Debug('BSR: #5.1 Read Xmas Data')
                 rXmas = self.requestWasteData(xMas=True)
                 Domoticz.Debug('BSR: #5.2 Parse Data (without Xmas')

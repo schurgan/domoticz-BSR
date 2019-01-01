@@ -54,11 +54,14 @@ sys.path.append('/usr/lib/python3/dist-packages')
         - 'waste' aka Restmüll or Hausmüll
         - 'recycling' aka Wertstoffe or gelber Sack
         - 'bio' biodegradable waste
-    -  Debug: if True, the log will be hold a lot more output.
+        - 'xmas' shows colleciton dates for xmas trees
+    -  Debug: 
+       -  if True, the log will be hold a lot more output.
+       -  false is the normal mode
+       -  true deatil -> also shows response on log
   
 ## Bugs and ToDos
 - using Locale for dates,months, days ... works good on windows, breaks on linux
-- Weihnachtsbaum, they are special
 - add feature to create summary device or/and device per type
 - own alarm pictures matching the waste type
 - Street names often have just "...str." not "....strasse" 
@@ -75,6 +78,11 @@ In development.
 Based on https://github.com/ffes/domoticz-buienradar/ there are
  -  `fakeDomoticz.py` - used to run it outside of Domoticz
  -  `testBsr.py` it's the entry point for tests
+
+## ChangeLog
+1.0.0 init
+1.1.0 added more debug options and also display xmas tree collections date
+1.1.1 now xmas tree collection date is only shown in December and January
 
 
 
