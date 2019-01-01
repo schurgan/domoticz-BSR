@@ -37,7 +37,23 @@ SHOW_ICON_IN_DETAIL = False
 
 
 class WasteData:
+    '''small class that holds information for waste collection
+  
+    Returns:
+        [type] -- [description]
+    '''
+
     def __init__(self, wasteType: str, divClass: str, show: bool = True):
+        '''init the waste data object
+        
+        Arguments:
+            wasteType {str} -- type of this waste
+            divClass {str} -- inner class name of the span element used for this waste type
+        
+        Keyword Arguments:
+            show {bool} -- if False, this type should not be shown (default: {True})
+        '''
+
         self.wasteDate = None
         self.wasteType = wasteType
         self.wasteHint = None
@@ -61,10 +77,28 @@ class WasteData:
         return self.wasteDate is None
 
     def getShortStatus(self):
+        '''waste info (date) (hint)
+        
+        Returns:
+            str -- status as text
+        '''
+
         return "{} {}".format(self.wasteDate, self.wasteHint)
 
     def getImageTag(self, size: str = '13', border: str = '1', align: str = ''):
+        '''generates an image tag based on the
+        
+        Keyword Arguments:
+            size {str} -- heihgt of the icon (default: {'13'})
+            border {str} -- thickness of the board (default: {'1'})
+            align {str} -- eg. top, works good on names (default: {''})
+        
+        Returns:
+            {str} -- html image tag
+        '''
         i = ''
+        # we do it in non proper way. Otherwise Update Name will fail on Domoticz. 
+        # "src='sdsd' foo bar --> leads to invalid sql"
         if(self.wasteImage is not None):
             i = "<img src=https://www.bsr.de{} "\
                 "border={} height={} align={} >"\
@@ -72,6 +106,13 @@ class WasteData:
         return i
 
     def getLongStatus(self):
+        '''status information for this waste data.
+        format (date) [optional image] (type) (hint)
+    
+        Returns:
+            str -- the status as text/html
+        '''
+
         d = "- kein -"
         i = ''
         if(self.wasteDate is not None):
@@ -86,6 +127,10 @@ class WasteData:
             '' if self.wasteHint is None else "(" + self.wasteHint + ")")
 
     def isComplete(self):
+        '''if date is present this data is complete.
+        Returns:
+            bool -- true -> complete
+        '''
         return (self.wasteDate is None and self.show is False) or self.wasteDate is not None
 
 
@@ -105,6 +150,20 @@ class Bsr:
                  showXmasWaste: bool = False,
                  debugResponse: bool = False
                  ):
+        '''init the bsr object. With that you can access data from bsr website.
+        
+        Arguments:
+            street {str} -- street name
+            zipCode {str} -- post code
+            houseNumber {str} -- house number
+        
+        Keyword Arguments:
+            showHouseholdWaste {bool} -- turn on/off normal waste  (default: {True})
+            showRecycleWaste {bool} -- turn on/off plastic waste (default: {True})
+            showBioWaste {bool} -- turn on/off bio waste (default: {True})
+            showXmasWaste {bool} -- turn on/off xmas tree (default: {False})
+            debugResponse {bool} -- turn on/off output of response from bsr website  (default: {False})
+        '''
         self.showHouseholdWaste = showHouseholdWaste
         self.showRecycleWaste = showRecycleWaste
         self.showBioWaste = showBioWaste
@@ -192,6 +251,12 @@ class Bsr:
         )
 
     def getAlarmLevel(self):
+        '''calculates alarm level based on nearest waste element
+        
+        Returns:
+            {int} -- alarm level
+        ''' 
+
         alarm = 0
         if(self.hasError is False):
             dt = self.getNearestDate()
@@ -202,6 +267,13 @@ class Bsr:
         return alarm
 
     def getAlarmText(self):
+        '''only returns latest element like: (date) [optional hint]
+        if you want more, look at getSummary()
+        
+        Returns:
+            {str} -- data from nearest text 
+        '''
+
         s = "No Data"
         if(self.hasError is False and self.nearest is not None):
             hint = self.nearest.getHint()
@@ -211,6 +283,13 @@ class Bsr:
         return s
 
     def getDeviceName(self):
+        '''calculates a name based on nearest waste element
+        form: [image optional] (waste type) (days till collection)
+
+        Returns:
+            {str} -- name as string
+        '''
+
         s = "No Data"
         if(self.nearest is not None):
             dt = self.getNearestDate()
@@ -524,6 +603,15 @@ class Bsr:
 
 
 def calculateAlarmLevel(wasteDate):
+    '''takes an waste element and calculates the domoticz alarm level
+
+    Arguments:
+        wasteDate {[type]} -- the element to check
+
+    Returns:
+        [{int}, text ]-- alarm level and text holding the days till date
+    '''
+
     level = 1
     smallerTxt = ""
     if(wasteDate is not None):
