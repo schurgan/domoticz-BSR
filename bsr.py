@@ -38,18 +38,18 @@ SHOW_ICON_IN_DETAIL = False
 
 class WasteData:
     '''small class that holds information for waste collection
-  
+
     Returns:
         [type] -- [description]
     '''
 
     def __init__(self, wasteType: str, divClass: str, show: bool = True):
         '''init the waste data object
-        
+
         Arguments:
             wasteType {str} -- type of this waste
             divClass {str} -- inner class name of the span element used for this waste type
-        
+
         Keyword Arguments:
             show {bool} -- if False, this type should not be shown (default: {True})
         '''
@@ -78,7 +78,7 @@ class WasteData:
 
     def getShortStatus(self):
         '''waste info (date) (hint)
-        
+
         Returns:
             str -- status as text
         '''
@@ -87,17 +87,17 @@ class WasteData:
 
     def getImageTag(self, size: str = '13', border: str = '1', align: str = ''):
         '''generates an image tag based on the
-        
+
         Keyword Arguments:
             size {str} -- heihgt of the icon (default: {'13'})
             border {str} -- thickness of the board (default: {'1'})
             align {str} -- eg. top, works good on names (default: {''})
-        
+
         Returns:
             {str} -- html image tag
         '''
         i = ''
-        # we do it in non proper way. Otherwise Update Name will fail on Domoticz. 
+        # we do it in non proper way. Otherwise Update Name will fail on Domoticz.
         # "src='sdsd' foo bar --> leads to invalid sql"
         if(self.wasteImage is not None):
             i = "<img src=https://www.bsr.de{} "\
@@ -108,7 +108,7 @@ class WasteData:
     def getLongStatus(self):
         '''status information for this waste data.
         format (date) [optional image] (type) (hint)
-    
+
         Returns:
             str -- the status as text/html
         '''
@@ -151,12 +151,12 @@ class Bsr:
                  debugResponse: bool = False
                  ):
         '''init the bsr object. With that you can access data from bsr website.
-        
+
         Arguments:
             street {str} -- street name
             zipCode {str} -- post code
             houseNumber {str} -- house number
-        
+
         Keyword Arguments:
             showHouseholdWaste {bool} -- turn on/off normal waste  (default: {True})
             showRecycleWaste {bool} -- turn on/off plastic waste (default: {True})
@@ -252,10 +252,10 @@ class Bsr:
 
     def getAlarmLevel(self):
         '''calculates alarm level based on nearest waste element
-        
+
         Returns:
             {int} -- alarm level
-        ''' 
+        '''
 
         alarm = 0
         if(self.hasError is False):
@@ -269,9 +269,9 @@ class Bsr:
     def getAlarmText(self):
         '''only returns latest element like: (date) [optional hint]
         if you want more, look at getSummary()
-        
+
         Returns:
-            {str} -- data from nearest text 
+            {str} -- data from nearest text
         '''
 
         s = "No Data"
@@ -298,7 +298,11 @@ class Bsr:
             img = ''
             if (SHOW_ICON_IN_NAME is True):
                 img = "{}".format(self.nearest.getImageTag('22', '0', 'top'))
-            s = "{} {} {}".format(img, self.nearest.getType(), lvl[1])    
+            t = self.nearest.getType()
+            # remove () from type to keep title short
+            t = re.sub("[\(\[].*?[\)\]]", "", t)
+            s = "{} {} {}".format(img, t, lvl[1])
+
         if(self.hasError is True):
             s = "!Error!"
         return s
@@ -353,7 +357,7 @@ class Bsr:
         # One line sort function method using an inline lambda function lambda x: x.date
         # The value for the key param needs to be a value that identifies the sorting property on the object
         customObjects.sort(key=lambda x: x.wasteDate
-            if(x and x.wasteDate) else datetime.now().date(), reverse=False)
+                           if(x and x.wasteDate) else datetime.now().date(), reverse=False)
         for obj in customObjects:
             Domoticz.Debug("Sorted: " + str(obj.wasteDate) + ":  " + obj.wasteType)
             summary = summary + obj.getLongStatus() + seperator
@@ -371,10 +375,17 @@ class Bsr:
     #     smallerTxt = 'FEHLER';
 
     def setError(self, error):
+        '''sets the error msg and put error flag to True
+
+        Arguments:
+            error {Exception} -- the catched exception
+        '''
         self.hasError = True
         self.errorMsg = error
 
     def resetError(self):
+        '''just removes error flag and deletes last error msg
+        '''
         self.hasError = False
         self.errorMsg = None
 
@@ -385,7 +396,7 @@ class Bsr:
             path = path[:-1]
         return path
 
-    def requestWasteData(self, xMas: bool=False): 
+    def requestWasteData(self, xMas: bool=False):
         Domoticz.Debug('Retrieve waste collection data from ' + self.bsrUrl)
 
         r = requests.get('https://www.bsr.de/abfuhrkalender-20520.php')

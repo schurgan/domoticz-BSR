@@ -83,7 +83,7 @@ Based on https://github.com/ffes/domoticz-buienradar/ there are
 1.0.0 init
 1.1.0 added more debug options and also display xmas tree collections date
 1.1.1 now xmas tree collection date is only shown in December and January
-
+1.1.2: for device name: removed content in '(foo)' from waste type, to keep it short
 
 
 

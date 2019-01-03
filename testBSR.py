@@ -56,7 +56,7 @@ def creatTestXmasLikePlugin():
 def runTest(bsr: Bsr):
     bsr.dumpBsrConfig()
     bsr.readBsrWasteCollection()
-   # bsr.dumpBsrStatus()
+    # bsr.dumpBsrStatus()
     bsr.dumpBsrStatus()
     print("summary: {}".format(bsr.getSummary()))
     print("date: {} \nlevel:{} \ntxt: {} \nname: {}".format(bsr.getNearestDate(),

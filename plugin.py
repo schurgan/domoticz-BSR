@@ -1,3 +1,7 @@
+# plugin for displaying waste collections date from berlins waste company
+#
+# Author: belze
+#
 """
 Bsr Waste Collection Date Reader Plugin
 
@@ -6,14 +10,15 @@ Author: Belze(2018)
 
 Version:    1.0.0: Initial Version
             1.1.0: add support for xmas trees and more debug options
-            1.1.1 now xmas tree collection date is only shown in December and January
+            1.1.1: now xmas tree collection date is only shown in December and January
+            1.1.2: for device name: removed content in '(foo)' from waste type, to keep it short
 """
 """
 
 
 <plugin key="BsrWasteCollection"
 name="BSR - Berlin Waste Collection" author="belze"
-version="1.1.1" wikilink="" externallink="https://github.com/belzetrigger/domoticz-BSR" >
+version="1.1.2" wikilink="" externallink="https://github.com/belzetrigger/domoticz-BSR" >
     <description>
         <h2>BSR - Berlin Waste Collection Plugin</h2><br/>
         <h3>Features</h3>
