@@ -600,12 +600,13 @@ class Bsr:
 
                     if(self.xmasData.isComplete() is True):
                         break
-
+            # only set last Update time if success
+            self.lastUpdate = datetime.now()
         except (Exception) as e:
             Domoticz.Error("Error: {} used paths: {} ".format(e, sys.path))
             self.setError(e)
             return
-        self.lastUpdate = datetime.now()
+     
 
 
 #############################################################################

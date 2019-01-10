@@ -12,13 +12,15 @@ Version:    1.0.0: Initial Version
             1.1.0: add support for xmas trees and more debug options
             1.1.1: now xmas tree collection date is only shown in December and January
             1.1.2: for device name: removed content in '(foo)' from waste type, to keep it short
+            1.1.3: if there is an error, ignore polling time and try with next heart beat
+            1.1.4: update also if we have a day change on hearbeat, so we will get correct device name
 """
 """
 
 
 <plugin key="BsrWasteCollection"
 name="BSR - Berlin Waste Collection" author="belze"
-version="1.1.2" wikilink="" externallink="https://github.com/belzetrigger/domoticz-BSR" >
+version="1.1.4" wikilink="" externallink="https://github.com/belzetrigger/domoticz-BSR" >
     <description>
         <h2>BSR - Berlin Waste Collection Plugin</h2><br/>
         <h3>Features</h3>
@@ -98,6 +100,9 @@ class BasePlugin:
         self.debug = False
         self.error = False
         self.nextpoll = datetime.now()
+        self.errorCounter = 0
+        # init with next poll to avoid NONE validation
+        self.lastUpdate = self.nextpoll
 
         return
 
@@ -187,9 +192,9 @@ class BasePlugin:
             Domoticz.Log('{}: {}'.format(modulename, sys.modules[modulename]))
 
         myNow = datetime.now()
-        if myNow >= self.nextpoll:
+        # Domoticz.Debug("now: {} last: {}".format(myNow.day, self.lastUpdate.day))
+        if myNow >= self.nextpoll or (myNow.day != self.lastUpdate.day):
             Domoticz.Debug("----------------------------------------------------")
-            self.nextpoll = myNow + timedelta(seconds=self.pollinterval)
             self.bsr.readBsrWasteCollection()
 
             alarmLevel = 0
@@ -197,21 +202,34 @@ class BasePlugin:
             name = 'BSR'
 
             if(self.bsr.hasError is True):
+                self.errorCounter += 1
                 alarmLevel = 4
                 summary = "msg: {}".format(self.bsr.errorMsg)
                 name = '!BSR Error!'
                 updateDevice(1, alarmLevel, summary, name)
+
+                if(self.errorCounter % 10):
+                    Domoticz.Log("got {} times an error, wait 5 min before try again".format(self.errorCounter))
+                    self.nextpoll = myNow + timedelta(minutes=5)
+
             else:
+                # no error, reset counter
+                self.errorCounter = 0
                 # check if update needed
                 if self.bsr.needUpdate is True:
                     alarmLevel = self.bsr.getAlarmLevel()
                     summary = self.bsr.getSummary()
                     name = self.bsr.getDeviceName()
-                    updateDevice(1, alarmLevel, summary, name)
+                    # TODO as we change name but updateDevice is not checking this, we say alwaysUpdate
+                    updateDevice(1, alarmLevel, summary, name, True)
+                    self.lastUpdate = myNow
+                # only on succees set next poll time, so on error, we run it next heartbeat
+                self.nextpoll = myNow + timedelta(seconds=self.pollinterval)
 
             # check if
             # if self.bsr.needUpdate is True:
             #    updateDevice(1, self.bsr.getAlarmLevel(), self.bsr.getSummary(), self.bsr.getDeviceName())
+            Domoticz.Debug("next poll: {}".format(self.nextpoll))
             Domoticz.Debug("----------------------------------------------------")
 
 
