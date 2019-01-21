@@ -14,13 +14,15 @@ Version:    1.0.0: Initial Version
             1.1.2: for device name: removed content in '(foo)' from waste type, to keep it short
             1.1.3: if there is an error, ignore polling time and try with next heart beat
             1.1.4: update also if we have a day change on hearbeat, so we will get correct device name
+            1.1.5: small fix to ignore dates older then today entries for waste disposal, 
+                   eg. xmas tree always returned full list.
 """
 """
 
 
 <plugin key="BsrWasteCollection"
 name="BSR - Berlin Waste Collection" author="belze"
-version="1.1.4" wikilink="" externallink="https://github.com/belzetrigger/domoticz-BSR" >
+version="1.1.5" wikilink="" externallink="https://github.com/belzetrigger/domoticz-BSR" >
     <description>
         <h2>BSR - Berlin Waste Collection Plugin</h2><br/>
         <h3>Features</h3>

@@ -86,6 +86,6 @@ Based on https://github.com/ffes/domoticz-buienradar/ there are
 1.1.2: for device name: removed content in '(foo)' from waste type, to keep it short
 1.1.3: if there is an error, ignore polling time and try with next heart beat again
 1.1.4: update also if we have a day change between last update and hearbeat, so we will get correct device name with numbers of days
-
+1.1.5: small fix to ignore dates older then today entries for waste disposal, eg. xmas tree always returned full list.
 
 

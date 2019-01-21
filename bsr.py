@@ -315,19 +315,19 @@ class Bsr:
 
     def checkForNearest(self, dt: WasteData):
         '''takes given data and put in store, if this on is important for alarm level self.
-        therefore search for smallest date.
+        therefore search for smallest date. BUT this must be at least today.
         Arguments:
             dt {WasteData} -- the data to verify
         '''
-
+        now = datetime.now().date()
         if(dt is None or dt.getDate() is None):
             return
-        if(self.nearest is None):
+        if(self.nearest is None and dt.getDate() >= now ):
             self.nearest = dt
             return
         if(dt is not None and dt.getDate() is not None):
             # check deeper
-            if(dt.getDate() < self.nearest.getDate()):
+            if(dt.getDate() < self.nearest.getDate() and dt.getDate() >= now ):
                 self.nearest = dt
 
     def timeToShowXms(self):
@@ -651,6 +651,7 @@ def calculateAlarmLevel(wasteDate):
 
 def scanAndParse(tag, wasteData: WasteData):
     image = None
+    now = datetime.now().date()
     try:
         image = tag.find('img')
     except Exception as e:
@@ -661,12 +662,15 @@ def scanAndParse(tag, wasteData: WasteData):
         try:
             result = parseBsrHtmlList(tag)
             if(result is not None):
-                wasteData.wasteDate = result[0]
-                wasteData.wasteType = result[1]
-                wasteData.wasteHint = result[2]
-                if(image is not None):
-                    wasteData.wasteImage = image['src']
-                    Domoticz.Debug("img: {}".format(image))
+                if(result[0] is not None and result[0] >= now ):    
+                    wasteData.wasteDate = result[0]
+                    wasteData.wasteType = result[1]
+                    wasteData.wasteHint = result[2]
+                    if(image is not None):
+                        wasteData.wasteImage = image['src']
+                        Domoticz.Debug("img: {}".format(image))
+                else:
+                    Domoticz.Debug("Skip entry, was to old... {}".format(result[0]) )
             else:
                 Domoticz.Debug("Result was empty?!")
         except Exception as e:
