@@ -14,15 +14,16 @@ Version:    1.0.0: Initial Version
             1.1.2: for device name: removed content in '(foo)' from waste type, to keep it short
             1.1.3: if there is an error, ignore polling time and try with next heart beat
             1.1.4: update also if we have a day change on hearbeat, so we will get correct device name
-            1.1.5: small fix to ignore dates older then today entries for waste disposal, 
+            1.1.5: small fix to ignore dates older then today entries for waste disposal,
                    eg. xmas tree always returned full list.
+            1.1.6: new debug option to turn on fast reload from service, polltime is handled as minutes
 """
 """
 
 
 <plugin key="BsrWasteCollection"
 name="BSR - Berlin Waste Collection" author="belze"
-version="1.1.5" wikilink="" externallink="https://github.com/belzetrigger/domoticz-BSR" >
+version="1.1.6" wikilink="" externallink="https://github.com/belzetrigger/domoticz-BSR" >
     <description>
         <h2>BSR - Berlin Waste Collection Plugin</h2><br/>
         <h3>Features</h3>
@@ -48,7 +49,7 @@ version="1.1.5" wikilink="" externallink="https://github.com/belzetrigger/domoti
         <param field="Mode3" label="Number" width="50px" required="true"
         default="1"/>
         <param field="Mode4" label="Update every x hours" width="200px"
-        required="true" default="24"/>
+        required="true" default="6"/>
 
         <param field="Mode5" label="What Kind of collection should be listed" width="200px"
         title="here you can choose what to show">
@@ -66,6 +67,7 @@ version="1.1.5" wikilink="" externallink="https://github.com/belzetrigger/domoti
                 <option label="True" value="Debug"/>
                 <option label="False" value="Normal"  default="False" />
                 <option label="True full deatail" value="Debug_response"   />
+                <option label="True fast full deatail" value="Debug_response_fast"   />
             </options>
         </param>
     </params>
@@ -100,6 +102,7 @@ class BasePlugin:
 
     def __init__(self):
         self.debug = False
+        self.debugFast = False
         self.error = False
         self.nextpoll = datetime.now()
         self.errorCounter = 0
@@ -117,21 +120,6 @@ class BasePlugin:
             Domoticz.Debugging(0)
 
         Domoticz.Debug("onStart called")
-
-        # check polling interval parameter
-        try:
-            temp = int(Parameters["Mode4"])
-        except:
-            Domoticz.Error("Invalid polling interval parameter")
-        else:
-            if temp < 6:
-                temp = 6  # minimum polling interval
-                Domoticz.Error("Specified polling interval too short: changed to 6 hours")
-            elif temp > (24 * 5):
-                temp = (24 * 5)  # maximum polling interval is 5 day
-                Domoticz.Error("Specified polling interval too long: changed to 5 days")
-            self.pollinterval = temp * 60 * 60
-        Domoticz.Log("Using polling interval of {} seconds".format(str(self.pollinterval)))
 
         self.street = Parameters["Mode1"]
         self.zip = Parameters["Mode2"]
@@ -166,6 +154,34 @@ class BasePlugin:
             self.debugResponse = True
         else:
             self.debugResponse = False
+
+        if("fast" in Parameters["Mode6"]):
+            self.debugFast = True
+        else:
+            self.debugFast = False
+
+        # now lets set poll time after we do have all debug options
+        # check polling interval parameter
+        try:
+            temp = int(Parameters["Mode4"])
+        except:
+            Domoticz.Error("Invalid polling interval parameter")
+        else:
+            if(self.debugFast is True):
+                Domoticz.Debug("Fast debug is turned on, so handle poll time as minutes!")
+                if temp < 1 and temp > 180:
+                    temp = 5
+                    Domoticz.Error("Even on Debug per minute update time should between 1 and 180")
+                self.pollinterval = temp * 60
+            else:
+                if temp < 6:
+                    temp = 6  # minimum polling interval
+                    Domoticz.Error("Specified polling interval too short: changed to 6 hours")
+                elif temp > (24 * 5):
+                    temp = (24 * 5)  # maximum polling interval is 5 day
+                    Domoticz.Error("Specified polling interval too long: changed to 5 days")
+                self.pollinterval = temp * 60 * 60
+        Domoticz.Log("Using polling interval of {} seconds".format(str(self.pollinterval)))
 
         self.bsr = Bsr(self.street, self.zip, self.nr, self.showWaste,
                        self.showRecycle, self.showBio, showXmasWaste=self.showXmas, debugResponse=self.debugResponse)

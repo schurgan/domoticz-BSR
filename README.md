@@ -59,6 +59,7 @@ sys.path.append('/usr/lib/python3/dist-packages')
        -  if True, the log will be hold a lot more output.
        -  false is the normal mode
        -  true deatil -> also shows response on log
+       -  True fast full deatail -> handles poll time as minutes, for faster debugging
   
 ## Bugs and ToDos
 - using Locale for dates,months, days ... works good on windows, breaks on linux
@@ -87,5 +88,5 @@ Based on https://github.com/ffes/domoticz-buienradar/ there are
 1.1.3: if there is an error, ignore polling time and try with next heart beat again
 1.1.4: update also if we have a day change between last update and hearbeat, so we will get correct device name with numbers of days
 1.1.5: small fix to ignore dates older then today entries for waste disposal, eg. xmas tree always returned full list.
-
+1.1.6: new debug paramater 'True fast full deatail'. if it is turned on, handle update intervall as minutes not hours!
 

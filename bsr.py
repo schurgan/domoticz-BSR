@@ -322,12 +322,12 @@ class Bsr:
         now = datetime.now().date()
         if(dt is None or dt.getDate() is None):
             return
-        if(self.nearest is None and dt.getDate() >= now ):
+        if(self.nearest is None and dt.getDate() >= now):
             self.nearest = dt
             return
         if(dt is not None and dt.getDate() is not None):
             # check deeper
-            if(dt.getDate() < self.nearest.getDate() and dt.getDate() >= now ):
+            if(dt.getDate() < self.nearest.getDate() and dt.getDate() >= now):
                 self.nearest = dt
 
     def timeToShowXms(self):
@@ -401,17 +401,6 @@ class Bsr:
 
         r = requests.get('https://www.bsr.de/abfuhrkalender-20520.php')
         url = 'https://www.bsr.de/abfuhrkalender_ajax.php?script=dynamic_kalender_ajax'
-        formdata = {'abf_strasse': 'Germanenstr.',
-                    'abf_hausnr': '30D',
-                    'tab_control': 'Liste',
-                    'abf_config_weihnachtsbaeume': '',
-                    'abf_config_restmuell': 'on',
-                    'abf_config_biogut': 'on',
-                    'abf_config_wertstoffe': 'on',
-                    'abf_config_laubtonne': 'on',
-                    'abf_selectmonth': '11+2018',
-                    'abf_datepicker': '30.10.2018',
-                    'listitems': '7'}
 
         s = requests.Session()
         s.get('https://www.bsr.de/abfuhrkalender-20520.php')
@@ -606,8 +595,6 @@ class Bsr:
             Domoticz.Error("Error: {} used paths: {} ".format(e, sys.path))
             self.setError(e)
             return
-     
-
 
 #############################################################################
 #                       Data specific functions                             #
@@ -662,7 +649,7 @@ def scanAndParse(tag, wasteData: WasteData):
         try:
             result = parseBsrHtmlList(tag)
             if(result is not None):
-                if(result[0] is not None and result[0] >= now ):    
+                if(result[0] is not None and result[0] >= now):
                     wasteData.wasteDate = result[0]
                     wasteData.wasteType = result[1]
                     wasteData.wasteHint = result[2]
@@ -670,7 +657,7 @@ def scanAndParse(tag, wasteData: WasteData):
                         wasteData.wasteImage = image['src']
                         Domoticz.Debug("img: {}".format(image))
                 else:
-                    Domoticz.Debug("Skip entry, was to old... {}".format(result[0]) )
+                    Domoticz.Debug("Skip entry, was to old... {}".format(result[0]))
             else:
                 Domoticz.Debug("Result was empty?!")
         except Exception as e:
