@@ -213,16 +213,22 @@ class Bsr:
         '''
         self.nearest = None
         self.location = None
-        self.restData = WasteData("Restmuell", Bsr.HOUSEHOLD_CLASS, self.showHouseholdWaste)
-        self.recycleData = WasteData("Wertstoffe", Bsr.RECYCLE_CLASS, self.showRecycleWaste)
-        self.bioData = WasteData("Bio", Bsr.BIO_CLASS, self.showBioWaste)
-        self.xmasData = WasteData("Weihnachtsbaum", Bsr.XMASTREE_CLASS, self.showXmasWaste)
+        self.initWasteDate()
         self.nextCollectionDate = None
         self.nextCollectionName = None
         self.nextCollectionHint = None
         self.observationDate = None
         self.needUpdate = True
         self.resetError()
+
+    def initWasteDate(self):
+        '''re-init waste date objects
+        '''
+
+        self.restData = WasteData("Restmuell", Bsr.HOUSEHOLD_CLASS, self.showHouseholdWaste)
+        self.recycleData = WasteData("Wertstoffe", Bsr.RECYCLE_CLASS, self.showRecycleWaste)
+        self.bioData = WasteData("Bio", Bsr.BIO_CLASS, self.showBioWaste)
+        self.xmasData = WasteData("Weihnachtsbaum", Bsr.XMASTREE_CLASS, self.showXmasWaste)
 
     def dumpBsrStatus(self):
         '''just print current status to log
@@ -553,6 +559,8 @@ class Bsr:
                 raise Exception("Could not load data - verify settings")
             else:
                 self.resetError()
+                # reset data store
+                self.initWasteDate()
             for tag in soup.find_all("li"):
                 Domoticz.Log('BSR: #4.3\t {} - {} '.format(tag.time.get('datetime'), tag.img.get('alt')))
                 if self.showHouseholdWaste is True:
@@ -645,7 +653,6 @@ def scanAndParse(tag, wasteData: WasteData):
         pass
     if wasteData.isEmpty() and tag.find('span', {'class': wasteData.divClass}) is not None:
         Domoticz.Debug("found matching entry for {}" .format(wasteData.wasteType))
-        result = ["", "", ""]
         try:
             result = parseBsrHtmlList(tag)
             if(result is not None):

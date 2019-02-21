@@ -89,4 +89,5 @@ Based on https://github.com/ffes/domoticz-buienradar/ there are
 1.1.4: update also if we have a day change between last update and hearbeat, so we will get correct device name with numbers of days
 1.1.5: small fix to ignore dates older then today entries for waste disposal, eg. xmas tree always returned full list.
 1.1.6: new debug paramater 'True fast full deatail'. if it is turned on, handle update intervall as minutes not hours!
+1.1.7: bugfix, forgott to clear data storage before reading them from webservice
 

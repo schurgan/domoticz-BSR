@@ -17,13 +17,15 @@ Version:    1.0.0: Initial Version
             1.1.5: small fix to ignore dates older then today entries for waste disposal,
                    eg. xmas tree always returned full list.
             1.1.6: new debug option to turn on fast reload from service, polltime is handled as minutes
+            1.1.7: bugfix, forgott to clear data storage before reading them from webservice
+
 """
 """
 
 
 <plugin key="BsrWasteCollection"
 name="BSR - Berlin Waste Collection" author="belze"
-version="1.1.6" wikilink="" externallink="https://github.com/belzetrigger/domoticz-BSR" >
+version="1.1.7" wikilink="" externallink="https://github.com/belzetrigger/domoticz-BSR" >
     <description>
         <h2>BSR - Berlin Waste Collection Plugin</h2><br/>
         <h3>Features</h3>
@@ -88,7 +90,7 @@ sys.path.append('/volume1/@appstore/py3k/usr/local/lib/python3.5/site-packages')
 sys.path.append('C:\\Program Files (x86)\\Python37-32\\Lib\\site-packages')
 
 try:
-    import Domoticz
+    import Domoticz  # pylint: disable=import-error # nopep8
 except ImportError:
     import fakeDomoticz as Domoticz
 
@@ -96,6 +98,8 @@ try:
     from bsr import Bsr
 except Exception as e:
     pass
+
+
 
 
 class BasePlugin:
@@ -108,7 +112,6 @@ class BasePlugin:
         self.errorCounter = 0
         # init with next poll to avoid NONE validation
         self.lastUpdate = self.nextpoll
-
         return
 
     def onStart(self):
