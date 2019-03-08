@@ -560,7 +560,8 @@ class Bsr:
             else:
                 self.resetError()
                 # reset data store
-                self.initWasteDate()
+                # self.initWasteDate()
+                self.reset()
             for tag in soup.find_all("li"):
                 Domoticz.Log('BSR: #4.3\t {} - {} '.format(tag.time.get('datetime'), tag.img.get('alt')))
                 if self.showHouseholdWaste is True:

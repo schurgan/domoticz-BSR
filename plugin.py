@@ -100,8 +100,6 @@ except Exception as e:
     pass
 
 
-
-
 class BasePlugin:
 
     def __init__(self):
