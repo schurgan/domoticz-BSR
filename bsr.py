@@ -1,9 +1,10 @@
-# moved logic of meteo rss warning to extra class
+# moved logic of to extra class
 import re
 from datetime import datetime, timedelta
 from time import mktime
 import time as myTime
-import urllib
+# import urllib
+from urllib.parse import quote, quote_plus
 import os
 # import locale, breaks domoticz on synology ...
 # try:
@@ -396,13 +397,13 @@ class Bsr:
         self.errorMsg = None
 
     # convert module to python source filename
-    def _py_source(module):
+    def _py_source(self, module):
         path = module.__file__
         if path[:-1].endswith("py"):
             path = path[:-1]
         return path
 
-    def requestWasteData(self, xMas: bool=False):
+    def requestWasteData(self, xMas: bool = False):
         Domoticz.Debug('Retrieve waste collection data from ' + self.bsrUrl)
 
         r = requests.get('https://www.bsr.de/abfuhrkalender-20520.php')
@@ -739,7 +740,7 @@ def convertUrl(parameter: str):
     Returns:
         str -- string with replaced ' '
     """
-    s = urllib.parse.quote(parameter)
+    s = quote(parameter)
     return s
 
 
@@ -752,7 +753,7 @@ def convert4Query(parameter: str):
     Returns:
         [type] -- str
     """
-    s = urllib.parse.quote_plus(parameter)
+    s = quote_plus(parameter)
     return s
     # return parameter.replace(",", "%2C").replace(" ", "+")
 
