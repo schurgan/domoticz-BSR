@@ -38,9 +38,9 @@ version="1.1.7" wikilink="" externallink="https://github.com/belzetrigger/domoti
         <ul style="list-style-type:square">
             <li>BSR - Alarm device to show data</li>
         </ul>
-        <h3>Tipp</h3>
-        Best is visit first -><a href:="https://www.bsr.de/abfuhrkalender-20520.php">
-        BSR </a> to verify your address.
+        <h3>Hint</h3>
+        Best is visit first -><a href="https://www.bsr.de/abfuhrkalender-20520.php">
+        BSR_</a>  to verify your address.
     </description>
 
     <params>
@@ -86,8 +86,10 @@ from math import asin, cos, radians, sin, sqrt
 from os import path
 import sys
 sys.path
-sys.path.append('/volume1/@appstore/py3k/usr/local/lib/python3.5/site-packages')
-sys.path.append('C:\\Program Files (x86)\\Python37-32\\Lib\\site-packages')
+# synlogy
+# sys.path.append('/volume1/@appstore/py3k/usr/local/lib/python3.5/site-packages')
+# windows
+# sys.path.append('C:\\Program Files (x86)\\Python37-32\\Lib\\site-packages')
 
 try:
     import Domoticz  # pylint: disable=import-error # nopep8
