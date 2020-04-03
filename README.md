@@ -15,7 +15,7 @@ This plugin is open source.
 
 
 ## Installation and Setup
-- a running Domoticz, tested with 4.4x and 2020.1
+- a running Domoticz, tested with 4.10717 and 2020.1
 - Python 3
 - install needed python moduls:
   - beautifullsoup4 aka bs4
