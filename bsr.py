@@ -20,8 +20,8 @@ except ImportError:
 
 import sys
 sys.path
-sys.path.append('/volume1/@appstore/py3k/usr/local/lib/python3.5/site-packages')
-sys.path.append('C:\\Program Files (x86)\\Python37-32\\Lib\\site-packages')
+# sys.path.append('/volume1/@appstore/py3k/usr/local/lib/python3.5/site-packages')
+# sys.path.append('C:\\Program Files (x86)\\Python37-32\\Lib\\site-packages')
 
 try:
     from bs4 import BeautifulSoup
