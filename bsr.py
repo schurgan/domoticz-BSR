@@ -117,7 +117,9 @@ class WasteData:
         d = "- kein -"
         i = ''
         if(self.wasteDate is not None):
-            d = "{:%Y-%b-%d %a}: ".format(self.wasteDate)
+            # d = "{:%Y-%b-%d %a}: ".format(self.wasteDate)
+            # use german format
+            d = "{:%d.%m.%Y %a}: ".format(self.wasteDate)
         if(self.wasteImage is not None and SHOW_ICON_IN_DETAIL is True):
             i = self.getImageTag(14)
         return "{} {} {} {}".format(
@@ -688,6 +690,7 @@ def parseBsrHtmlList(tag):
     colDate = tag.time.get('datetime')
     Domoticz.Debug("colDate1 {}".format(colDate))
     colDate = getDate(colDate, '%Y-%m-%d')
+    # colDate = getDate(colDate, '%d.%m.%Y')
     result = [colDate, colName, colHint]
     return result
 
