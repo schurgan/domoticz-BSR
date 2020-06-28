@@ -18,8 +18,8 @@ try:
 except ImportError:
     import fakeDomoticz as Domoticz
 
-import sys
-sys.path
+#import sys
+# sys.path
 # sys.path.append('/volume1/@appstore/py3k/usr/local/lib/python3.5/site-packages')
 # sys.path.append('C:\\Program Files (x86)\\Python37-32\\Lib\\site-packages')
 
@@ -35,6 +35,7 @@ except Exception as e:
 
 SHOW_ICON_IN_NAME = False
 SHOW_ICON_IN_DETAIL = False
+BSR_HOUR_THRESHOLD = 14      # o'clock when it is time to show next date
 
 
 class WasteData:
@@ -336,8 +337,13 @@ class Bsr:
             return
         if(dt is not None and dt.getDate() is not None):
             # check deeper
-            if(dt.getDate() < self.nearest.getDate() and dt.getDate() >= now):
-                self.nearest = dt
+            if (datetime.now().hour > BSR_HOUR_THRESHOLD):
+                Domoticz.Debug("It's after threshold time, so its to late and today does not count ...")
+                if(dt.getDate() < self.nearest.getDate() and dt.getDate() > now):
+                    self.nearest = dt
+            else:
+                if(dt.getDate() < self.nearest.getDate() and dt.getDate() >= now):
+                    self.nearest = dt
 
     def timeToShowXms(self):
         '''checks if it's time to show xmas tree collection dataself.
@@ -548,7 +554,7 @@ class Bsr:
                 Domoticz.Debug('data: {}'.format(r.content))
 
             # chck beautifukSoup, get lost in combination of lxml and restart
-            verifyBS4()
+            # only for debugging and testing verifyBS4()
             soup = BeautifulSoup(r.content, 'html.parser')
             # Domoticz.Debug('BSR: #4.2 Date:\t scan html' )
             wertStoffDate = None
@@ -761,18 +767,19 @@ def convert4Query(parameter: str):
     # return parameter.replace(",", "%2C").replace(" ", "+")
 
 
-def verifyBS4():
-    if(modulLoaded('bs4') is False):
-        try:
-            from bs4 import BeautifulSoup
-        except Exception as e:
-            Domoticz.Error("Error import BeautifulSoup".format(e))
+# def verifyBS4():
+#     if(modulLoaded('bs4') is False):
+#         try:
+#             from bs4 import BeautifulSoup
+#         except Exception as e:
+#             Domoticz.Error("Error import BeautifulSoup".format(e))
 
 
-def modulLoaded(modulename: str):
-    if modulename not in sys.modules:
-        Domoticz.Error('{} not imported'.format(modulename))
-        return False
-    else:
-        Domoticz.Debug('{}: {}'.format(modulename, sys.modules[modulename]))
-        return True
+# def modulLoaded(modulename: str):
+#     import sys
+#     if modulename not in sys.modules:
+#         Domoticz.Error('{} not imported'.format(modulename))
+#         return False
+#     else:
+#         Domoticz.Debug('{}: {}'.format(modulename, sys.modules[modulename]))
+#         return True
