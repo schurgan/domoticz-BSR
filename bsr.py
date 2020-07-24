@@ -18,7 +18,7 @@ try:
 except ImportError:
     import fakeDomoticz as Domoticz
 
-#import sys
+# import sys
 # sys.path
 # sys.path.append('/volume1/@appstore/py3k/usr/local/lib/python3.5/site-packages')
 # sys.path.append('C:\\Program Files (x86)\\Python37-32\\Lib\\site-packages')
@@ -35,7 +35,7 @@ except Exception as e:
 
 SHOW_ICON_IN_NAME = False
 SHOW_ICON_IN_DETAIL = False
-BSR_HOUR_THRESHOLD = 14      # o'clock when it is time to show next date
+BSR_HOUR_THRESHOLD = 12      # o'clock when it is time to show next date
 
 
 class WasteData:
@@ -332,18 +332,18 @@ class Bsr:
         now = datetime.now().date()
         if(dt is None or dt.getDate() is None):
             return
-        if(self.nearest is None and dt.getDate() >= now):
-            self.nearest = dt
-            return
-        if(dt is not None and dt.getDate() is not None):
-            # check deeper
-            if (datetime.now().hour > BSR_HOUR_THRESHOLD):
-                Domoticz.Debug("It's after threshold time, so its to late and today does not count ...")
-                if(dt.getDate() < self.nearest.getDate() and dt.getDate() > now):
-                    self.nearest = dt
-            else:
-                if(dt.getDate() < self.nearest.getDate() and dt.getDate() >= now):
-                    self.nearest = dt
+        h = datetime.now().hour
+        d = datetime.now().date()
+        if((dt.getDate() == datetime.now().date() and
+                datetime.now().hour < BSR_HOUR_THRESHOLD) or
+                dt.getDate() > datetime.now().date()):
+
+            if(self.nearest is None):
+                self.nearest = dt
+            elif (self.nearest.getDate() > dt.getDate()):
+                self.nearest = dt
+        else:
+            Domoticz.Debug("{} It's after threshold ..., ignore it".format(dt.getDate()))
 
     def timeToShowXms(self):
         '''checks if it's time to show xmas tree collection dataself.
