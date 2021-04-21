@@ -210,7 +210,7 @@ class BasePlugin:
         if modulename not in sys.modules:
             Domoticz.Log('{} not imported'.format(modulename))
         else:
-            Domoticz.Log('{}: {}'.format(modulename, sys.modules[modulename]))
+            Domoticz.Debug('{}: {}'.format(modulename, sys.modules[modulename]))
 
         myNow = datetime.now()
         # Domoticz.Debug("now: {} last: {}".format(myNow.day, self.lastUpdate.day))
