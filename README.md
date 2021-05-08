@@ -91,13 +91,16 @@ Based on https://github.com/ffes/domoticz-buienradar/ there are
  -  `testBsr.py` it's the entry point for tests
 
 ## ChangeLog
-1.0.0 init
-1.1.0 added more debug options and also display xmas tree collections date
-1.1.1 now xmas tree collection date is only shown in December and January
-1.1.2: for device name: removed content in '(foo)' from waste type, to keep it short
-1.1.3: if there is an error, ignore polling time and try with next heart beat again
-1.1.4: update also if we have a day change between last update and heartbeat, so we will get correct device name with numbers of days
-1.1.5: small fix to ignore dates older then today entries for waste disposal, eg. xmas tree always returned full list.
-1.1.6: new debug parameter 'True fast full detail'. if it is turned on, handle update intervale as minutes not hours!
-1.1.7: bugfix, forgot to clear data storage before reading them from web service
-2.0.0: rebuild project structure
+
+| Version | Note                                                                                     |
+| ------- | ---------------------------------------------------------------------------------------- |
+| 2.0.0   | rebuild project structure |
+| 1.1.7   | bugfix, forgot to clear data storage before reading them from web service |
+| 1.1.6   | new debug parameter 'True fast full detail'. if it is turned on, handle update intervale as minutes not hours! |
+| 1.1.5   | small fix to ignore dates older then today entries for waste disposal, eg. xmas tree always returned full list. |
+| 1.1.4   | update also if we have a day change between last update and heartbeat, so we will get correct device name with numbers of days |
+| 1.1.3   | if there is an error, ignore polling time and try with next heart beat again | 
+| 1.1.2   | for device name: removed content in '(foo)' from waste type, to keep it short |
+| 1.1.1   | now xmas tree collection date is only shown in December and January  |
+| 1.1.0   | added more debug options and also display xmas tree collections date |
+| 1.0.0   | init |
