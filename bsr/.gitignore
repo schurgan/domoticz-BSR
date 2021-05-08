@@ -108,4 +108,3 @@ venv.bak/
 info.prv
 test_prv.py
 *meteo*.py
-test/my_config.ini

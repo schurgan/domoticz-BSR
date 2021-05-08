@@ -1,5 +1,5 @@
 # domoticz-BSR
-[![PyPI pyversions](https://img.shields.io/badge/python-3.6%20|%203.7%20|%203.8-blue.svg)]() [![Plugin version](https://img.shields.io/badge/version-1.1.7.-red.svg)](https://github.com/belzetrigger/domoticz-BSR/branches/)
+[![PyPI pyversions](https://img.shields.io/badge/python-3.6%20|%203.7%20|%203.8-blue.svg)]() [![Plugin version](https://img.shields.io/badge/version-2.0.0.-red.svg)](https://github.com/belzetrigger/domoticz-BSR/branches/)
 
 Domoticz plugin that gets data of public waste collection for Berlin from the website of the [Berliner Stadtreinigungsbetriebe](http://www.bsr.de/).
 
@@ -17,7 +17,7 @@ This plugin is open source.
 ## Installation and Setup
 - a running Domoticz, tested with 4.10717 and 2020.1
 - Python 3
-- install needed python moduls:
+- install needed python modules:
   - beautifullsoup4 aka bs4
   - you can use `sudo pip3 install -r requirements.txt` 
 - clone project
@@ -69,18 +69,21 @@ This plugin is open source.
        -  True fast full detail -> handles poll time as minutes, for faster debugging
   
 ## Bugs and ToDos
+- bug in blocky, no real support for this kind of alarm switch
+- multiple collections on the same day - what to show?
 - using Locale for dates,months, days ... works good on windows, breaks on linux
 - add feature to create summary device or/and device per type
 - own alarm pictures matching the waste type
-- Street names often have just "...str." not "....strasse" 
+- Street names often have just "...str." not "....strasse"
 - similar street names within same zip code eg: 
     - Am Falkenberg 
     - Am Falkenberg am Wasserwerk
     - booth in 12524
-- mehrere Abholungen an einem Tag
+
+- 
 
 ## State
-Runs now for several years without any issue... Might get some updates for Domoticz 2020.1. 
+Runs now for several years without any issue... 
 
 ## Developing
 Based on https://github.com/ffes/domoticz-buienradar/ there are
@@ -96,5 +99,5 @@ Based on https://github.com/ffes/domoticz-buienradar/ there are
 1.1.4: update also if we have a day change between last update and heartbeat, so we will get correct device name with numbers of days
 1.1.5: small fix to ignore dates older then today entries for waste disposal, eg. xmas tree always returned full list.
 1.1.6: new debug parameter 'True fast full detail'. if it is turned on, handle update intervale as minutes not hours!
-1.1.7: bugfix, forgot to clear data storage before reading them from webservice
-
+1.1.7: bugfix, forgot to clear data storage before reading them from web service
+2.0.0: rebuild project structure

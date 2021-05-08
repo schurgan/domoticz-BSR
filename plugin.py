@@ -5,7 +5,7 @@
 """
 Bsr Waste Collection Date Reader Plugin
 
-Author: Belze(2018)
+Author: Belze(2021)
 
 
 Version:    1.0.0: Initial Version
@@ -17,15 +17,13 @@ Version:    1.0.0: Initial Version
             1.1.5: small fix to ignore dates older then today entries for waste disposal,
                    eg. xmas tree always returned full list.
             1.1.6: new debug option to turn on fast reload from service, polltime is handled as minutes
-            1.1.7: bugfix, forgott to clear data storage before reading them from webservice
-
-"""
-"""
+            1.1.7: bugfix, forgot to clear data storage before reading them from webservice
+            2.0.0: rebuild project structure and parameters
 
 
 <plugin key="BsrWasteCollection"
 name="BSR - Berlin Waste Collection" author="belze"
-version="1.1.7" wikilink="" externallink="https://github.com/belzetrigger/domoticz-BSR" >
+version="2.0.0" wikilink="" externallink="https://github.com/belzetrigger/domoticz-BSR" >
     <description>
         <h2>BSR - Berlin Waste Collection Plugin</h2><br/>
         <h3>Features</h3>
@@ -85,6 +83,7 @@ from datetime import datetime, timedelta
 from math import asin, cos, radians, sin, sqrt
 from os import path
 import sys
+
 sys.path
 # synlogy
 # sys.path.append('/volume1/@appstore/py3k/usr/local/lib/python3.5/site-packages')
@@ -94,16 +93,22 @@ sys.path
 try:
     import Domoticz  # pylint: disable=import-error # nopep8
 except ImportError:
-    import fakeDomoticz as Domoticz
+    from blz import fakeDomoticz as Domoticz
+    from blz.fakeDomoticz import Parameters
+    from blz.fakeDomoticz import Devices
+    from blz.fakeDomoticz import Images
 
 try:
-    from bsr import Bsr
+    from bsr.bsr import Bsr
 except Exception as e:
+    Domoticz.Error("could not load bsr lib")
     pass
 
 
+POLL_THRESHOLD_MIN_HOURS =  6 #:minimum time in hours to fetch new data
+POLL_THRESHOLD_MAX_HOURS =  24 * 5  #:max time in hours to fetch new data aka 5 days
+DEFAULT_POLL_INTERVAL_HOURS = POLL_THRESHOLD_MIN_HOURS #:standard to use if wrong, missing or buggy
 class BasePlugin:
-
     def __init__(self):
         self.debug = False
         self.debugFast = False
@@ -112,10 +117,11 @@ class BasePlugin:
         self.errorCounter = 0
         # init with next poll to avoid NONE validation
         self.lastUpdate = self.nextpoll
+        self.pollinterval = DEFAULT_POLL_INTERVAL_HOURS
         return
 
     def onStart(self):
-        if 'Debug' in Parameters["Mode6"]:
+        if "Debug" in Parameters["Mode6"]:
             self.debug = True
             Domoticz.Debugging(1)
             DumpConfigToLog()
@@ -128,37 +134,37 @@ class BasePlugin:
         self.zip = Parameters["Mode2"]
         self.nr = Parameters["Mode3"]
 
-# TODO get settings for waste, recylce, bio
+        # TODO get settings for waste, recycle, bio
 
         self.showWaste = False
         self.showRecycle = False
         self.showBio = False
-        if("bio" in Parameters["Mode5"]):
+        if "bio" in Parameters["Mode5"]:
             self.showBio = True
         else:
             self.showBio = False
 
-        if("waste" in Parameters["Mode5"]):
+        if "waste" in Parameters["Mode5"]:
             self.showWaste = True
         else:
             self.showWaste = False
 
-        if("recycling" in Parameters["Mode5"]):
+        if "recycling" in Parameters["Mode5"]:
             self.showRecycle = True
         else:
             self.showRecycle = False
 
-        if("xmas" in Parameters["Mode5"]):
+        if "xmas" in Parameters["Mode5"]:
             self.showXmas = True
         else:
             self.showXmas = False
 
-        if("response" in Parameters["Mode6"]):
+        if "response" in Parameters["Mode6"]:
             self.debugResponse = True
         else:
             self.debugResponse = False
 
-        if("fast" in Parameters["Mode6"]):
+        if "fast" in Parameters["Mode6"]:
             self.debugFast = True
         else:
             self.debugFast = False
@@ -170,26 +176,44 @@ class BasePlugin:
         except:
             Domoticz.Error("Invalid polling interval parameter")
         else:
-            if(self.debugFast is True):
-                Domoticz.Debug("Fast debug is turned on, so handle poll time as minutes!")
+            if self.debugFast is True:
+                Domoticz.Debug(
+                    "Fast debug is turned on, so handle poll time as minutes!"
+                )
                 if temp < 1 and temp > 180:
                     temp = 5
-                    Domoticz.Error("Even on Debug per minute update time should between 1 and 180")
+                    Domoticz.Error(
+                        "Even on Debug per minute update time should between 1 and 180"
+                    )
                 self.pollinterval = temp * 60
             else:
-                if temp < 6:
-                    temp = 6  # minimum polling interval
-                    Domoticz.Error("Specified polling interval too short: changed to 6 hours")
-                elif temp > (24 * 5):
-                    temp = (24 * 5)  # maximum polling interval is 5 day
-                    Domoticz.Error("Specified polling interval too long: changed to 5 days")
+                if temp < POLL_THRESHOLD_MIN_HOURS:
+                    temp = POLL_THRESHOLD_MIN_HOURS  # minimum polling interval
+                    Domoticz.Error(
+                        "Specified polling interval too short: changed to 6 hours"
+                    )
+                elif temp > POLL_THRESHOLD_MAX_HOURS:
+                    temp = POLL_THRESHOLD_MAX_HOURS
+                    Domoticz.Error(
+                        "Specified polling interval too long: changed to 5 days"
+                    )
                 self.pollinterval = temp * 60 * 60
-        Domoticz.Log("Using polling interval of {} seconds".format(str(self.pollinterval)))
+        Domoticz.Log(
+            "Using polling interval of {} seconds".format(str(self.pollinterval))
+        )
 
-        self.bsr = Bsr(self.street, self.zip, self.nr, self.showWaste,
-                       self.showRecycle, self.showBio, showXmasWaste=self.showXmas, debugResponse=self.debugResponse)
+        self.bsr = Bsr(
+            self.street,
+            self.zip,
+            self.nr,
+            self.showWaste,
+            self.showRecycle,
+            self.showBio,
+            showXmasWaste=self.showXmas,
+            debugResponse=self.debugResponse,
+        )
         if self.debug is True:
-            self.bsr.dumpBsrConfig()
+            self.bsr.dumpConfig()
 
         # Check if devices need to be created
         createDevices()
@@ -203,14 +227,20 @@ class BasePlugin:
 
     def onCommand(self, Unit, Command, Level, Hue):
         Domoticz.Debug(
-            "onCommand called for Unit " + str(Unit) + ": Parameter '" + str(Command) + "', Level: " + str(Level))
+            "onCommand called for Unit "
+            + str(Unit)
+            + ": Parameter '"
+            + str(Command)
+            + "', Level: "
+            + str(Level)
+        )
 
     def onHeartbeat(self):
-        modulename = 'bs4'
+        modulename = "bs4"
         if modulename not in sys.modules:
-            Domoticz.Log('{} not imported'.format(modulename))
+            Domoticz.Log("{} not imported".format(modulename))
         else:
-            Domoticz.Debug('{}: {}'.format(modulename, sys.modules[modulename]))
+            Domoticz.Debug("{}: {}".format(modulename, sys.modules[modulename]))
 
         myNow = datetime.now()
         # Domoticz.Debug("now: {} last: {}".format(myNow.day, self.lastUpdate.day))
@@ -219,32 +249,36 @@ class BasePlugin:
             self.bsr.readBsrWasteCollection()
 
             alarmLevel = 0
-            summary = 'No data'
-            name = 'BSR'
+            summary = "No data"
+            name = "BSR"
 
-            if(self.bsr.hasError is True):
+            if self.bsr.hasErrorX() is True:
                 self.errorCounter += 1
                 alarmLevel = 4
-                summary = "msg: {}".format(self.bsr.errorMsg)
-                name = '!BSR Error!'
+                summary = "msg: {}".format(self.bsr.getErrorMsg())
+                name = "!BSR Error!"
                 updateDevice(1, alarmLevel, summary, name)
 
-                if(self.errorCounter % 10):
-                    Domoticz.Log("got {} times an error, wait 5 min before try again".format(self.errorCounter))
+                if self.errorCounter % 10:
+                    Domoticz.Log(
+                        "got {} times an error, wait 5 min before try again".format(
+                            self.errorCounter
+                        )
+                    )
                     self.nextpoll = myNow + timedelta(minutes=5)
 
             else:
                 # no error, reset counter
                 self.errorCounter = 0
                 # check if update needed
-                if self.bsr.needUpdate is True:
+                if self.bsr.needsUpdate() is True:
                     alarmLevel = self.bsr.getAlarmLevel()
                     summary = self.bsr.getSummary()
                     name = self.bsr.getDeviceName()
                     # TODO as we change name but updateDevice is not checking this, we say alwaysUpdate
                     updateDevice(1, alarmLevel, summary, name, True)
                     self.lastUpdate = myNow
-                # only on succees set next poll time, so on error, we run it next heartbeat
+                # only on success set next poll time, so on error, we run it next heartbeat
                 self.nextpoll = myNow + timedelta(seconds=self.pollinterval)
 
             # check if
@@ -277,6 +311,7 @@ def onHeartbeat():
     global _plugin
     _plugin.onHeartbeat()
 
+
 #############################################################################
 #                   common functions                     #
 #############################################################################
@@ -286,8 +321,7 @@ def onHeartbeat():
 
 
 def DumpConfigToLog():
-    '''just dumps the configuration to log.
-    '''
+    """just dumps the configuration to log."""
     for x in Parameters:
         if Parameters[x] != "":
             Domoticz.Debug("'" + x + "':'" + str(Parameters[x]) + "'")
@@ -314,6 +348,7 @@ def parseIntValue(s):
     except:
         return None
 
+
 #
 # Parse a float and return None if no float is given
 #
@@ -326,6 +361,7 @@ def parseFloatValue(s):
     except:
         return None
 
+
 #############################################################################
 #                       Data specific functions                             #
 #############################################################################
@@ -337,9 +373,9 @@ def parseFloatValue(s):
 
 
 def createDevices():
-    '''
+    """
     this creates the alarm device for waste collection
-    '''
+    """
     # create the mandatory child devices if not yet exist
     if 1 not in Devices:
         Domoticz.Device(Name="Müll", Unit=1, TypeName="Alert", Used=1).Create()
@@ -347,8 +383,8 @@ def createDevices():
 
 
 #
-def updateDevice(Unit, alarmLevel, alarmData, name='', alwaysUpdate=False):
-    '''update a device - means today or tomorrow, with given data.
+def updateDevice(Unit, alarmLevel, alarmData, name="", alwaysUpdate=False):
+    """update a device - means today or tomorrow, with given data.
     If there are changes and the device exists.
     Arguments:
         Unit {int} -- index of device, 1 = today, 2 = tomorrow
@@ -358,12 +394,14 @@ def updateDevice(Unit, alarmLevel, alarmData, name='', alwaysUpdate=False):
     Optional Arguments:
         name {str} -- optional: to set the name of that device, eg. mor info about  (default: {''})
         alwaysUpdate {bool} -- optional: to ignore current status/needs update (default: {False})
-    '''
+    """
 
     # Make sure that the Domoticz device still exists (they can be deleted) before updating it
     if Unit in Devices:
-        if (alarmData != Devices[Unit].sValue) or (int(alarmLevel) != Devices[Unit].nValue or alwaysUpdate is True):
-            if(len(name) <= 0):
+        if (alarmData != Devices[Unit].sValue) or (
+            int(alarmLevel) != Devices[Unit].nValue or alwaysUpdate is True
+        ):
+            if len(name) <= 0:
                 Devices[Unit].Update(int(alarmLevel), alarmData)
             else:
                 Devices[Unit].Update(int(alarmLevel), alarmData, Name=name)
