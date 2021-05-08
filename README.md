@@ -87,12 +87,11 @@ Runs now for several years without any issue...
 
 ## Developing
 Based on https://github.com/ffes/domoticz-buienradar/ there are
- - `/blz/fakeDomoticz.py` - used to run it outside of Domoticz
- - unittest under folder `/test`  - it's the new entry point for tests
- - `/blz/blzHelperInterface.py` starting point for some more structure
-
+- `/blz/fakeDomoticz.py` - used to run it outside of Domoticz
+- `/blz/blzHelperInterface.py` starting point for some more structure
+- unittest under folder `/test`  - it's the new entry point for tests
+  - copy `sample_config.ini`  to `my_config.ini` and adapt to your liking  
 ## ChangeLog
-
 | Version | Note                                                                                     |
 | ------- | ---------------------------------------------------------------------------------------- |
 | 2.0.0   | rebuild project structure |
