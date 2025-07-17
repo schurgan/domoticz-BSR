@@ -1,25 +1,5 @@
 {
-    "python.pythonPath": "C:\\Program Files\\Python38\\python.exe",
-    "python.linting.mypyEnabled": true,
-    "python.linting.mypyArgs": [
-        "--strict-optional",
-        "--ignore-missing-imports"
-    ],
-    "python.linting.pycodestyleEnabled": true,
-    "python.linting.pycodestyleArgs": [
-        "--max-line-length=120",
-        "--ignore=E402"
-    ],
-    "python.linting.pylintEnabled": true,
-    "python.linting.pylintPath": "C:\\Users\\che\\AppData\\Local\\Programs\\Python\\Python37-32\\Scripts\\pylint.exe",
-    "python.linting.pylintArgs": [
-        "--max-line-length=120"
-    ],
-    "editor.formatOnSave": true,
-    "editor.rulers": [
-        80,
-        120
-    ],
+    "python.pythonPath": "C:\\Program Files\\Python39\\python.exe",
     "files.exclude": {
         "**/.git": true,
         "**/.svn": true,
@@ -30,11 +10,33 @@
         "**/*.pyc": true
     },
     "workbench.editor.enablePreview": false,
-    "python.linting.pylamaEnabled": false,
-    "python.linting.enabled": true,
-    "python.formatting.provider": "autopep8",
-    "python.formatting.autopep8Args": [
-        "--max-line-length=200",
-        "--ignore=E402"
-    ]
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./test",
+        "-p",
+        "test_*.py"
+    ],
+    "python.testing.pytestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.unittestEnabled": true,
+    "cSpell.words": [
+        "Bremer",
+        "Domoticz",
+        "Raspbian",
+        "TASMOTA",
+        "Uuups",
+        "Wifi",
+        "appstore",
+        "dscr",
+        "fritzconnection",
+        "lxml",
+        "pyversions"
+    ],
+    "python.formatting.provider": "black",
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportMissingImports": "Domoticz"
+    },
+    "python.terminal.activateEnvInCurrentTerminal": true
+
 }

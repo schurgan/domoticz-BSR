@@ -120,6 +120,4 @@ class BlzHelperInterface(metaclass=Interface):
         """returns the error message if exists"""
         pass
 
-    @abstractfunc
-    def getSummary(self, seperator: str = "<br>"):
-        pass
+ 

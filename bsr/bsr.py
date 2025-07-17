@@ -50,12 +50,12 @@ class WasteData:
         [type] -- [description]
     """
 
-    def __init__(self, wasteType: str, divClass: str, show: bool = True):
+    def __init__(self, wasteType: str, category: str, show: bool = True):
         """init the waste data object
 
         Arguments:
             wasteType {str} -- type of this waste
-            divClass {str} -- inner class name of the span element used for this waste type
+            category {str} -- internal category used for this waste type
 
         Keyword Arguments:
             show {bool} -- if False, this type should not be shown (default: {True})
@@ -64,15 +64,21 @@ class WasteData:
         self.wasteDate = None
         self.wasteType = wasteType
         self.wasteHint = None
-        self.divClass = divClass
+        self.category = category
         self.show = show
         self.wasteImage = None
+        self.serviceDay = None
+        self.servieDate_regular = None
+        self.rhythm = None
 
     def getDate(self):
         return self.wasteDate
 
     def getType(self):
         return self.wasteType
+    
+    def getTypeLongName(self):
+        return Bsr.category_names.get(self.wasteType)
 
     def getImage(self):
         return self.wasteImage
@@ -135,7 +141,7 @@ class WasteData:
             d,
             i,
             # '-' if self.wasteDate is None else self.wasteDate,
-            self.wasteType,
+            self.getTypeLongName(),
             "" if self.wasteHint is None else "(" + self.wasteHint + ")",
         )
 
@@ -151,11 +157,18 @@ class WasteData:
 
 class Bsr(BlzHelperInterface):
 
-    # span class used by bsr to mark dif. waste type
-    BIO_CLASS = "Biogut"
-    RECYCLE_CLASS = "WertstoffeAlba"
-    HOUSEHOLD_CLASS = "Restmuell"
-    XMASTREE_CLASS = "Weihnachtsbaeume"
+    # now it is catergory
+    BIO_CAT = "BI"
+    RECYCLE_CAT = "WS"
+    HOUSEHOLD_CAT = "HM"
+    XMASTREE_CAT = "LT"
+
+    category_names = {
+    BIO_CAT: "Biogut",
+    RECYCLE_CAT: "Wertstoffe",
+    HOUSEHOLD_CAT: "Hausmüll",
+    XMASTREE_CAT: "Weihnachtsbaum"
+}
 
     def __init__(
         self,
@@ -187,7 +200,7 @@ class Bsr(BlzHelperInterface):
         self.showBioWaste = showBioWaste
         self.showXmasWaste = showXmasWaste
         self.debugResponse = debugResponse
-        self.bsrUrl = "https://www.bsr.de/abfuhrkalender-20520.php"
+        self.bsrUrl = "https://www.bsr.de/abfuhrkalender"
         self.street = street
         self.number = houseNumber
         self.zip = zipCode
@@ -247,14 +260,14 @@ class Bsr(BlzHelperInterface):
         """re-init waste date objects"""
 
         self.restData = WasteData(
-            "Restmuell", Bsr.HOUSEHOLD_CLASS, self.showHouseholdWaste
+            "Restmuell", Bsr.HOUSEHOLD_CAT, self.showHouseholdWaste
         )
         self.recycleData = WasteData(
-            "Wertstoffe", Bsr.RECYCLE_CLASS, self.showRecycleWaste
+            "Wertstoffe", Bsr.RECYCLE_CAT, self.showRecycleWaste
         )
-        self.bioData = WasteData("Bio", Bsr.BIO_CLASS, self.showBioWaste)
+        self.bioData = WasteData("Bio", Bsr.BIO_CAT, self.showBioWaste)
         self.xmasData = WasteData(
-            "Weihnachtsbaum", Bsr.XMASTREE_CLASS, self.showXmasWaste
+            "Weihnachtsbaum", Bsr.XMASTREE_CAT, self.showXmasWaste
         )
 
     def dumpStatus(self):
@@ -332,7 +345,7 @@ class Bsr(BlzHelperInterface):
             img = ""
             if SHOW_ICON_IN_NAME is True:
                 img = "{}".format(self.nearest.getImageTag("22", "0", "top"))
-            t = self.nearest.getType()
+            t = self.nearest.getTypeLongName()
             # remove () from type to keep title short
             t = re.sub("[\(\[].*?[\)\]]", "", t)
             s = "{} {} {}".format(img, t, lvl[1])
@@ -451,26 +464,28 @@ class Bsr(BlzHelperInterface):
     def requestWasteData(self, xMas: bool = False):
         Domoticz.Debug("Retrieve waste collection data from " + self.bsrUrl)
 
-        r = requests.get("https://www.bsr.de/abfuhrkalender-20520.php")
-        url = "https://www.bsr.de/abfuhrkalender_ajax.php?script=dynamic_kalender_ajax"
+        r = requests.get(self.bsrUrl)
+        
 
         s = requests.Session()
-        s.get("https://www.bsr.de/abfuhrkalender-20520.php")
+        s.get(self.bsrUrl)
 
         # 1: get street
-        url = "https://www.bsr.de/abfuhrkalender_ajax.php?script=dynamic_search&step=1&q={}".format(
+        url = "https://umnewforms.bsr.de/p/de.bsr.adressen.app/streetNames/?searchQuery={}".format(
             self.street
         )
+       
         headers = {
             "Accept-Encoding": "gzip, deflate, br",
             "Accept-Language": "de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7",
             "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) "
             "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36",
             "Accept": "application/json, text/javascript, */*; q=0.01",
-            "Referer": "https://www.bsr.de/abfuhrkalender-20520.php",
+            "Referer": "https://www.bsr.de/",
         }
-        r = s.post(url, headers=headers)
+        r = s.get(url, headers=headers)
         data = r.json()
+        # TODO check status
         Domoticz.Debug("BSR: #2 working Streets:\t")
         relevantStreet = None
 
@@ -498,10 +513,10 @@ class Bsr(BlzHelperInterface):
             )
         )
 
-        # 2: get house number
+        # 2: get results for street and house number
         url = (
-            "https://www.bsr.de/abfuhrkalender_ajax.php?"
-            "script=dynamic_search&step=2&q={}".format(bsrParamRelvStreet)
+            "https://umnewforms.bsr.de/p/de.bsr.adressen.app//plzSet/plzSet?searchQuery={}:::{}"
+            .format(bsrParamRelvStreet, self.number)
         )
         headers = {
             "Accept-Encoding": "gzip, deflate, br",
@@ -510,31 +525,51 @@ class Bsr(BlzHelperInterface):
             "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             "Accept": "*/*",
-            "Referer": "https://www.bsr.de/abfuhrkalender-20520.php",
+            "Referer": "https://www.bsr.de/",
         }
-        formdata = {"step": "2", "q": bsrQueryRelvStreet}
-        r = s.post(url, headers=headers)
+        r = s.get(url, headers=headers)
         json = r.json()
-        Domoticz.Debug("BSR: #3 Numbers:\t")
+        Domoticz.Debug("BSR: #3 scan results based on street an number -> check zip code:\t")
+        relevant_item = None
         relevantNumber = None
 
-        if len(json) > 1:
-            Domoticz.Log("Found more than one number - try to guess ...")
-            for k, v in json.items():
-                #    # for nr in json:
-                if self.number == v["HouseNo"]:
-                    relevantNumber = v
-                    Domoticz.Debug("found nr:\t{}".format(v))
-        else:
-            items = list(json.values())
-            first = list(items)[0]
-            # Domoticz.Error(first)
-            relevantNumber = first
+        relevant_item = next((item for item in json if self.zip in item["label"]), None)
 
+        # Extract the value
+        relevantNumber = relevant_item["value"] if relevant_item else None
+
+        # Print matching items
+        Domoticz.Debug("found nr:\t{}".format(relevant_item))
+        
+        if len(json) > 1:
+            Domoticz.Log("Found more than one number - tried to guess on zip code ...")
+        
+        # Print matching items
+        Domoticz.Debug("found nr:\t{}".format(relevant_item))
+      
         if relevantNumber is None:
             raise Exception("Did not find a relevant number")
+        
+        # Get today's date and date 4 weeks ahead
+        today = datetime.today()
+        start_of_week = today - timedelta(days=today.weekday())  # Monday = 0
+        four_weeks_later = today + timedelta(weeks=4)
 
-        url = "https://www.bsr.de/abfuhrkalender_ajax.php?script=dynamic_kalender_ajax"
+        # Format dates in the required format: yyyy-MM-ddTHH:mm:ss
+        date_from_str = start_of_week.strftime("%Y-%m-%dT00:00:00")
+
+        date_to_str = four_weeks_later.strftime("%Y-%m-%dT00:00:00")
+
+        # categroies: HM = Hausmüll, BI=Bio, WS=Wertstoffe LT=? maybe xmas?
+        # Build the URL
+        url = (
+            f"https://umnewforms.bsr.de/p/de.bsr.adressen.app/abfuhrEvents?"
+            f"filter=AddrKey%20eq%20%27{relevantNumber}%27%20"
+            f"and%20DateFrom%20eq%20datetime%27{date_from_str}%27%20"
+            f"and%20DateTo%20eq%20datetime%27{date_to_str}%27%20"
+            f"and%20(Category%20eq%20%27HM%27%20or%20Category%20eq%20%27BI%27%20or%20Category%20eq%20%27WS%27%20or%20Category%20eq%20%27LT%27)"
+        )
+
         headers = {
             "Accept-Encoding": "gzip, deflate, br",
             "Accept-Language": "de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7",
@@ -542,50 +577,25 @@ class Bsr(BlzHelperInterface):
             "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             "Accept": "*/*",
-            "Referer": "https://www.bsr.de/abfuhrkalender-20520.php",
+            "Referer": "https://www.bsr.de/",
         }
-
+        # TODO 
+        # done dates
+        # add catergories eg for xmas?
+        
         # BSR use same query for xmas trees but, returns only those!
         if xMas is True:
             abf_config_weihnachtsbaeume = "on"
         else:
             abf_config_weihnachtsbaeume = ""
-        data = (
-            "abf_strasse={}&"
-            "abf_hausnr={}&tab_control=Liste&"
-            "abf_config_weihnachtsbaeume={}&"
-            "abf_config_restmuell=on&"
-            "abf_config_biogut=on&abf_config_wertstoffe=on&"
-            "abf_config_laubtonne=on&"
-            "abf_selectmonth=12+2018&"
-            "abf_datepicker=11.12.2018"
-            "&listitems=7".format(
-                convert4Query(relevantNumber["Street"]),
-                relevantNumber["HouseNo"],
-                abf_config_weihnachtsbaeume,
-            )
-        )
+       
         # Domoticz.Debug("data: {}".format(data))
-        r = s.post(url, data=data, headers=headers)
+        r = s.get(url, headers=headers)
         return r
-        # xmas
-        # data = 'abf_strasse={}&'\
-        #     'abf_hausnr={}&tab_control=Liste&'\
-        #     'abf_config_weihnachtsbaeume=on&'\
-        #     'abf_config_restmuell=&'\
-        #     'abf_config_biogut=&abf_config_wertstoffe=on&'\
-        #     'abf_config_laubtonne=&'\
-        #     'abf_selectmonth=12+2018&'\
-        #     'abf_datepicker=11.12.2018'\
-        #     '&listitems=7'.format(
-        #         convert4Query(relevantNumber["Street"]),
-        #         relevantNumber["HouseNo"]
-        #     )
-        # # Domoticz.Debug("data: {}".format(data))
-        # rXmas = s.post(url, data=data, headers=headers)
+       
 
     def readBsrWasteCollection(self):
-        """tries to get rss data from meteo and parse it.
+        """tries to get  data from bsr and parse it.
         Values are stored on attributes.
         check self.needUpdate. if we get new data we set a flag there.
         """
@@ -593,19 +603,90 @@ class Bsr(BlzHelperInterface):
         try:
             # Domoticz.Debug('Retrieve waste collection data from ' + self.bsrUrl)
             r = self.requestWasteData()
+            # Today (just date, no time part)
+            now = datetime.now().date()
+
             Domoticz.Debug("BSR: #4 Parse Data (without Xmas")
             if self.debugResponse is True:
                 Domoticz.Debug("data: {}".format(r.content))
 
-            # check beautifulSoup, get lost in combination of lxml and restart
-            # only for debugging and testing verifyBS4()
-            soup = BeautifulSoup(r.content, "html.parser")
-            # Domoticz.Debug('BSR: #4.2 Date:\t scan html' )
-            wertStoffDate = None
-            restDate = None
-            isFirst = True
 
-            error = soup.find("li", {"class": "abf_errormsg"})
+            # Collect invalid entries (if any)
+            invalid_entries = []
+
+            # Define the valid categories
+            valid_categories = {"HM", "BI", "WS", "LT"}
+
+            # Loop through all date entries
+            for date_str, entries in r.json()["dates"].items():
+                for entry in entries:
+                    category = entry.get("category")
+                    if category not in valid_categories:
+                        invalid_entries.append({
+                            "reason": "unknwon category",
+                            "date": date_str,
+                            "category": category,
+                            "entry": entry
+                        })
+                        continue
+                    
+                    # check date
+                    service_date_str = entry.get("serviceDate_actual")
+                    if service_date_str == None:
+                        invalid_entries.append({
+                            "reason": "date is empty",
+                            "date": date_str,
+                            "category": category,
+                            "entry": entry
+
+                        })
+                        continue
+                    service_date = datetime.strptime(service_date_str, "%d.%m.%Y").date()
+                    if service_date <= now:
+                        invalid_entries.append({
+                            "reason": "serviceDate_actual not in future",
+                            "date": date_str,
+                            "category": category,
+                            "entry": entry
+                        })
+                        continue
+
+                    # take  care about it:
+                    if self.showHouseholdWaste is True:
+                        scanAndParse(entry, self.restData)
+                        self.checkForNearest(self.restData)
+                    if self.showRecycleWaste is True:
+                        scanAndParse(entry, self.recycleData)
+                        self.checkForNearest(self.recycleData)
+
+                    if self.showBioWaste is True:
+                        scanAndParse(entry, self.bioData)
+                        self.checkForNearest(self.bioData)
+
+                    # if we have all data, leave loop
+                    if (
+                        self.restData.isComplete() is True
+                        and self.recycleData.isComplete() is True
+                        and self.bioData.isComplete() is True
+                    ):
+                        break
+            Domoticz.Log(
+                "BSR: #4.4\t gelber Sack {}\tHausmuell {} ".format(
+                    self.recycleData.getDate(), self.restData.getDate()
+                )
+            )
+                        
+            # Output results
+            if invalid_entries:
+                Domoticz.Error("Invalid category entries found:")
+                for item in invalid_entries:
+                    Domoticz.Error(f"Date: {item['date']}, Category: {item['category']},  Reason: {item['reason']}")
+            else:
+                Domoticz.Debug("✅ All entries have valid categories.")
+
+            # TODO -> check for error?
+            # error = soup.find("li", {"class": "abf_errormsg"})
+            error = None
             if error is not None:
                 Domoticz.Log("Could not load waste collection data. Raise exception")
                 self.setError(error)
@@ -614,52 +695,23 @@ class Bsr(BlzHelperInterface):
                 self.resetError()
                 # reset data store
                 # self.initWasteDate()
-                self.reset()
-            for tag in soup.find_all("li"):
-                Domoticz.Log(
-                    "BSR: #4.3\t {} - {} ".format(
-                        tag.time.get("datetime"), tag.img.get("alt")
-                    )
-                )
-                if self.showHouseholdWaste is True:
-                    scanAndParse(tag, self.restData)
-                    self.checkForNearest(self.restData)
-                if self.showRecycleWaste is True:
-                    scanAndParse(tag, self.recycleData)
-                    self.checkForNearest(self.recycleData)
+                # do not reset, we just got fresh data ... self.reset()
+            
+            # TODO
+            # if self.showXmasWaste and self.timeToShowXms() is True:
+            #     Domoticz.Debug("BSR: #5.1 Read Xmas Data")
+            #     rXmas = self.requestWasteData(xMas=True)
+            #     Domoticz.Debug("BSR: #5.2 Parse Data (without Xmas")
+            #     if self.debugResponse is True:
+            #         Domoticz.Debug("data: {}".format(rXmas.content))
+            #     soup = BeautifulSoup(rXmas.content, "html.parser")
 
-                if self.showBioWaste is True:
-                    scanAndParse(tag, self.bioData)
-                    self.checkForNearest(self.bioData)
+            #     for xmasTag in soup.find_all("li"):
+            #         scanAndParse(xmasTag, self.xmasData)
+            #         self.checkForNearest(self.xmasData)
 
-                # if we have all data, leave loop
-                if (
-                    self.restData.isComplete() is True
-                    and self.recycleData.isComplete() is True
-                    and self.bioData.isComplete() is True
-                ):
-                    break
-
-            Domoticz.Log(
-                "BSR: #4.4\t gelber Sack {}\tHausmuell {} ".format(
-                    self.recycleData.getDate(), self.restData.getDate()
-                )
-            )
-
-            if self.showXmasWaste and self.timeToShowXms() is True:
-                Domoticz.Debug("BSR: #5.1 Read Xmas Data")
-                rXmas = self.requestWasteData(xMas=True)
-                Domoticz.Debug("BSR: #5.2 Parse Data (without Xmas")
-                if self.debugResponse is True:
-                    Domoticz.Debug("data: {}".format(rXmas.content))
-                soup = BeautifulSoup(rXmas.content, "html.parser")
-
-                for xmasTag in soup.find_all("li"):
-                    scanAndParse(xmasTag, self.xmasData)
-                    self.checkForNearest(self.xmasData)
-
-                    if self.xmasData.isComplete() is True:
-                        break
+            #         if self.xmasData.isComplete() is True:
+            #             break
             # only set last Update time if success
             self.lastUpdate = datetime.now()
         except (Exception) as e:
@@ -708,7 +760,7 @@ def calculateAlarmLevel(wasteDate):
     return [level, smallerTxt]
 
 
-def scanAndParse(tag, wasteData: WasteData):
+def scanAndParse(entry, wasteData: WasteData):
     image = None
     now = datetime.now().date()
     try:
@@ -717,50 +769,29 @@ def scanAndParse(tag, wasteData: WasteData):
         pass
     if (
         wasteData.isEmpty()
-        and tag.find("span", {"class": wasteData.divClass}) is not None
-    ):
+        and entry['category'] == wasteData.category 
+        ): 
         Domoticz.Debug("found matching entry for {}".format(wasteData.wasteType))
         try:
-            result = parseBsrHtmlList(tag)
-            if result is not None:
-                if result[0] is not None and result[0] >= now:
-                    wasteData.wasteDate = result[0]
-                    wasteData.wasteType = result[1]
-                    wasteData.wasteHint = result[2]
-                    if image is not None:
-                        wasteData.wasteImage = image["src"]
-                        Domoticz.Debug("img: {}".format(image))
-                else:
-                    Domoticz.Debug("Skip entry, was to old... {}".format(result[0]))
+            
+            if entry['serviceDate_actual'] is not None :
+                service_date = datetime.strptime( entry['serviceDate_actual'], "%d.%m.%Y").date()
+                wasteData.wasteDate = service_date
+                wasteData.wasteType = entry['category']
+                wasteData.wasteHint = entry['warningText']
+                if image is not None:
+                    wasteData.wasteImage = image["src"]
+                    Domoticz.Debug("img: {}".format(image))
             else:
-                Domoticz.Debug("Result was empty?!")
+                Domoticz.Debug("Skip entry,no date... {}".format(entry['serviceDate_actual']))
+            
         except Exception as e:
             Domoticz.Error(
-                "Could not parse content -> data {}\tresult {} ... exc: {} ".format(
-                    wasteData, result, e
+                "Could not parse content -> data {}\tentry {} ... exc: {} ".format(
+                    wasteData, entry, e
                 )
             )
     return wasteData
-
-
-def parseBsrHtmlList(tag):
-    result = ["", "", ""]
-    colName = tag.img.get("alt")
-    Domoticz.Debug("colName {}".format(colName))
-    colHint = tag.find("span", {"class": "Hinweis"})
-    if colHint is not None:
-        # Domoticz.Debug("Hinweis: {} ".format(hint['title']))
-        colHint = colHint["title"]
-        colHint = colHint.replace("\n", "").replace("\r", "").replace("<br>", "")
-        Domoticz.Debug("colHint {}".format(colHint))
-
-    colDate = tag.time.get("datetime")
-    Domoticz.Debug("colDate1 {}".format(colDate))
-    colDate = getDate(colDate, "%Y-%m-%d")
-    # colDate = getDate(colDate, '%d.%m.%Y')
-    result = [colDate, colName, colHint]
-    return result
-
 
 def getDate(sDate: str, sFormat: str):
     """Parse string to date object.
