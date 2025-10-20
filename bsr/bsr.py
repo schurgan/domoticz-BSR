@@ -24,6 +24,7 @@ from blz.blzHelperInterface import BlzHelperInterface
 
 import sys
 
+from blz.blzHelperInterface import scanAndParse
 # sys.path
 # sys.path.append('/volume1/@appstore/py3k/usr/local/lib/python3.5/site-packages')
 # sys.path.append('C:\\Program Files (x86)\\Python37-32\\Lib\\site-packages')
@@ -771,7 +772,6 @@ def calculateAlarmLevel(wasteDate):
 def scanAndParse(self, entry, wasteData: WasteData):
     image = None  # JSON enthält aktuell keine Bilder
     now = datetime.now().date()
-    pass
 
     if wasteData.isEmpty() and entry.get('category') == wasteData.category:
         Domoticz.Debug("found matching entry for {}".format(wasteData.wasteType))
