@@ -771,6 +771,7 @@ def calculateAlarmLevel(wasteDate):
 def scanAndParse(self, entry, wasteData: WasteData):
     image = None  # JSON enthält aktuell keine Bilder
     now = datetime.now().date()
+    pass
 
     if wasteData.isEmpty() and entry.get('category') == wasteData.category:
         Domoticz.Debug("found matching entry for {}".format(wasteData.wasteType))
