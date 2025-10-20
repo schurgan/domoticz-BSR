@@ -43,11 +43,7 @@ class BlzHelperInterface(metaclass=Interface):
         """
         pass
 
-    def scanAndParse(self, entry, data_object):
-        # ... Logik ...
-        pass
-
-    @abstractfunc
+  @abstractfunc
     def dumpConfig(self):
         """just print configuration and settings to log"""
         pass
