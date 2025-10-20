@@ -591,6 +591,12 @@ class Bsr(BlzHelperInterface):
         check self.needUpdate. if we get new data we set a flag there.
         """
 
+        # === KORREKTUR: "-1 Tag" Bug ===
+        # Setzt alle WasteData-Objekte (restData, bioData etc.) zurück.
+        # Ohne dies schlägt 'wasteData.isEmpty()' beim nächsten Lauf fehl.
+        self.initWasteData()
+        # === ENDE KORREKTUR ===
+        
         try:
             # Domoticz.Debug('Retrieve waste collection data from ' + self.bsrUrl)
             r = self.requestWasteData() # Ruft die Methode ohne xMas-Parameter auf
