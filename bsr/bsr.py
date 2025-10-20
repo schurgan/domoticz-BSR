@@ -218,7 +218,7 @@ class Bsr(BlzHelperInterface):
             boolean -- if True -> please update the device in domoticz
         """
 
-        return self.needsUpdate
+        return self.needUpdate
 
     def dumpConfig(self):
         """just print configuration and settings to log"""
@@ -762,29 +762,29 @@ def calculateAlarmLevel(wasteDate):
 
 def scanAndParse(entry, wasteData: WasteData):
     image = None
-    now = datetime.now().date()
     try:
-        image = tag.find("img")
-    except Exception as e:
-        pass
-    if (
-        wasteData.isEmpty()
-        and entry['category'] == wasteData.category 
-        ): 
+        # JSON response currently does not provide an <img> tag; keep image None
+        # If later a field with image is provided, handle it here:
+        if "image" in entry and entry["image"]:
+            image = entry["image"]
+    except Exception:
+        image = None
+
+    if (wasteData.isEmpty() and entry.get('category') == wasteData.category):
         Domoticz.Debug("found matching entry for {}".format(wasteData.wasteType))
         try:
-            
-            if entry['serviceDate_actual'] is not None :
-                service_date = datetime.strptime( entry['serviceDate_actual'], "%d.%m.%Y").date()
+            service_date_str = entry.get('serviceDate_actual')
+            if service_date_str is not None:
+                service_date = datetime.strptime(service_date_str, "%d.%m.%Y").date()
                 wasteData.wasteDate = service_date
-                wasteData.wasteType = entry['category']
-                wasteData.wasteHint = entry['warningText']
+                # wasteData.wasteType should be readable name; keep category to match later
+                wasteData.wasteType = entry.get('category', wasteData.wasteType)
+                wasteData.wasteHint = entry.get('warningText')
                 if image is not None:
-                    wasteData.wasteImage = image["src"]
+                    wasteData.wasteImage = image
                     Domoticz.Debug("img: {}".format(image))
             else:
-                Domoticz.Debug("Skip entry,no date... {}".format(entry['serviceDate_actual']))
-            
+                Domoticz.Debug("Skip entry,no date... {}".format(service_date_str))
         except Exception as e:
             Domoticz.Error(
                 "Could not parse content -> data {}\tentry {} ... exc: {} ".format(
