@@ -31,12 +31,12 @@ import sys
 try:
     from bs4 import BeautifulSoup
 except Exception as e:
-    Domoticz.Error("Error import BeautifulSoup".format(e))
+    Domoticz.Error(f"Error import BeautifulSoup: {e}")
 
 try:
     import requests
 except Exception as e:
-    Domoticz.Error("Error import requests".format(e))
+    Domoticz.Error(f"Error import requests: {e}")
 
 SHOW_ICON_IN_NAME = False
 SHOW_ICON_IN_DETAIL = False
@@ -464,9 +464,6 @@ class Bsr(BlzHelperInterface):
     def requestWasteData(self, xMas: bool = False):
         Domoticz.Debug("Retrieve waste collection data from " + self.bsrUrl)
 
-        r = requests.get(self.bsrUrl)
-        
-
         s = requests.Session()
         s.get(self.bsrUrl)
 
@@ -582,13 +579,7 @@ class Bsr(BlzHelperInterface):
         # TODO 
         # done dates
         # add catergories eg for xmas?
-        
-        # BSR use same query for xmas trees but, returns only those!
-        if xMas is True:
-            abf_config_weihnachtsbaeume = "on"
-        else:
-            abf_config_weihnachtsbaeume = ""
-       
+               
         # Domoticz.Debug("data: {}".format(data))
         r = s.get(url, headers=headers)
         return r
@@ -602,11 +593,11 @@ class Bsr(BlzHelperInterface):
 
         try:
             # Domoticz.Debug('Retrieve waste collection data from ' + self.bsrUrl)
-            r = self.requestWasteData()
+            r = self.requestWasteData() # Ruft die Methode ohne xMas-Parameter auf
             # Today (just date, no time part)
             now = datetime.now().date()
 
-            Domoticz.Debug("BSR: #4 Parse Data (without Xmas")
+            Domoticz.Debug("BSR: #4 Parse Data")
             if self.debugResponse is True:
                 Domoticz.Debug("data: {}".format(r.content))
 
@@ -616,6 +607,8 @@ class Bsr(BlzHelperInterface):
 
             # Define the valid categories
             valid_categories = {"HM", "BI", "WS", "LT"}
+            
+            all_data_found = False # Flag für äußere Schleife
 
             # Loop through all date entries
             for date_str, entries in r.json()["dates"].items():
@@ -641,35 +634,63 @@ class Bsr(BlzHelperInterface):
 
                         })
                         continue
+                    
                     service_date = datetime.strptime(service_date_str, "%d.%m.%Y").date()
-                    if service_date <= now:
+                    
+                    # === KORREKTUR DER DATUMSPRÜFUNG ===
+                    # 1. Datum liegt in der Vergangenheit
+                    if service_date < now:
                         invalid_entries.append({
-                            "reason": "serviceDate_actual not in future",
+                            "reason": "serviceDate_actual is in the past",
                             "date": date_str,
                             "category": category,
                             "entry": entry
                         })
                         continue
+                    
+                    # 2. Datum ist heute, ABER wir sind über der Anzeigeschwelle (BSR_HOUR_THRESHOLD)
+                    if service_date == now and datetime.now().hour >= BSR_HOUR_THRESHOLD:
+                        invalid_entries.append({
+                            "reason": f"serviceDate_actual is today, but after threshold ({BSR_HOUR_THRESHOLD}h)",
+                            "date": date_str,
+                            "category": category,
+                            "entry": entry
+                        })
+                        continue
+                    # === ENDE KORREKTUR DATUMSPRÜFUNG ===
 
-                    # take  care about it:
-                    if self.showHouseholdWaste is True:
+
+                    # === KORREKTUR: Effizienteres Parsing & Weihnachtsbaum-Logik ===
+                    if self.showHouseholdWaste is True and category == Bsr.HOUSEHOLD_CAT:
                         scanAndParse(entry, self.restData)
                         self.checkForNearest(self.restData)
-                    if self.showRecycleWaste is True:
+                    elif self.showRecycleWaste is True and category == Bsr.RECYCLE_CAT:
                         scanAndParse(entry, self.recycleData)
                         self.checkForNearest(self.recycleData)
-
-                    if self.showBioWaste is True:
+                    elif self.showBioWaste is True and category == Bsr.BIO_CAT:
                         scanAndParse(entry, self.bioData)
                         self.checkForNearest(self.bioData)
+                    elif self.showXmasWaste is True and self.timeToShowXms() is True and category == Bsr.XMASTREE_CAT:
+                        # Xmas-Logik hier integriert
+                        scanAndParse(entry, self.xmasData)
+                        self.checkForNearest(self.xmasData)
+                    # === ENDE KORREKTUR PARSING ===
+
 
                     # if we have all data, leave loop
+                    # Bedingung erweitert um xmasData (aber nur, wenn es relevant ist)
                     if (
                         self.restData.isComplete() is True
                         and self.recycleData.isComplete() is True
                         and self.bioData.isComplete() is True
+                        and (self.xmasData.isComplete() is True or self.timeToShowXms() is False)
                     ):
-                        break
+                        all_data_found = True # Flag setzen
+                        break # Innere Schleife verlassen
+                
+                if all_data_found:
+                    break # Äußere Schleife verlassen
+
             Domoticz.Log(
                 "BSR: #4.4\t gelber Sack {}\tHausmuell {} ".format(
                     self.recycleData.getDate(), self.restData.getDate()
@@ -684,41 +705,23 @@ class Bsr(BlzHelperInterface):
             else:
                 Domoticz.Debug("✅ All entries have valid categories.")
 
-            # TODO -> check for error?
-            # error = soup.find("li", {"class": "abf_errormsg"})
+            # ... (error handling) ...
             error = None
             if error is not None:
-                Domoticz.Log("Could not load waste collection data. Raise exception")
-                self.setError(error)
-                raise Exception("Could not load data - verify settings")
+                # ...
+                pass
             else:
                 self.resetError()
-                # reset data store
-                # self.initWasteDate()
-                # do not reset, we just got fresh data ... self.reset()
+
+            # === DER VERALTETE 'TODO' FÜR XMAS (Zeile 824-835) MUSS GELÖSCHT WERDEN ===
             
-            # TODO
-            # if self.showXmasWaste and self.timeToShowXms() is True:
-            #     Domoticz.Debug("BSR: #5.1 Read Xmas Data")
-            #     rXmas = self.requestWasteData(xMas=True)
-            #     Domoticz.Debug("BSR: #5.2 Parse Data (without Xmas")
-            #     if self.debugResponse is True:
-            #         Domoticz.Debug("data: {}".format(rXmas.content))
-            #     soup = BeautifulSoup(rXmas.content, "html.parser")
-
-            #     for xmasTag in soup.find_all("li"):
-            #         scanAndParse(xmasTag, self.xmasData)
-            #         self.checkForNearest(self.xmasData)
-
-            #         if self.xmasData.isComplete() is True:
-            #             break
             # only set last Update time if success
             self.lastUpdate = datetime.now()
         except (Exception) as e:
-            Domoticz.Error("Error: {} used paths: {} ".format(e, sys.path))
+            # Formatierung der Fehlermeldung hier auch verbessert
+            Domoticz.Error(f"Error: {e} used paths: {sys.path}")
             self.setError(e)
             return
-
 
 #############################################################################
 #                       Data specific functions                             #
@@ -772,7 +775,8 @@ def scanAndParse(entry, wasteData: WasteData):
                 service_date = datetime.strptime(service_date_str, "%d.%m.%Y").date()
                 wasteData.wasteDate = service_date
                 wasteData.wasteType = entry.get('category')
-                wasteData.wasteHint = entry.get('warningText', '')
+                hint_text = entry.get('warningText')
+                wasteData.wasteHint = hint_text if hint_text else None # Setzt None bei "" oder None
                 wasteData.wasteImage = None  # aktuell kein Bild vorhanden
             else:
                 Domoticz.Debug("Skip entry, no date... {}".format(entry))
