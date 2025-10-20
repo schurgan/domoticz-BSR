@@ -454,40 +454,6 @@ class Bsr(BlzHelperInterface):
         self.hasError = False
         self.errorMsg = None
 
-    @staticmethod
-    def scanAndParse(entry, wasteData: WasteData):
-    image = None
-    now = datetime.now().date()
-    try:
-        image = tag.find("img")
-    except Exception as e:
-        pass
-    if (
-        wasteData.isEmpty()
-        and entry['category'] == wasteData.category 
-        ): 
-        Domoticz.Debug("found matching entry for {}".format(wasteData.wasteType))
-        try:
-            
-            if entry['serviceDate_actual'] is not None :
-                service_date = datetime.strptime( entry['serviceDate_actual'], "%d.%m.%Y").date()
-                wasteData.wasteDate = service_date
-                wasteData.wasteType = entry['category']
-                wasteData.wasteHint = entry['warningText']
-                if image is not None:
-                    wasteData.wasteImage = image["src"]
-                    Domoticz.Debug("img: {}".format(image))
-            else:
-                Domoticz.Debug("Skip entry,no date... {}".format(entry['serviceDate_actual']))
-            
-        except Exception as e:
-            Domoticz.Error(
-                "Could not parse content -> data {}\tentry {} ... exc: {} ".format(
-                    wasteData, entry, e
-                )
-            )
-    return wasteData
-
     # convert module to python source filename
     def _py_source(self, module):
         path = module.__file__
@@ -687,14 +653,14 @@ class Bsr(BlzHelperInterface):
 
                     # take  care about it:
                     if self.showHouseholdWaste is True:
-                        self.scanAndParse(entry, self.restData)
+                        scanAndParse(entry, self.restData)
                         self.checkForNearest(self.restData)
                     if self.showRecycleWaste is True:
-                        self.scanAndParse(entry, self.recycleData)
+                        scanAndParse(entry, self.recycleData)
                         self.checkForNearest(self.recycleData)
 
                     if self.showBioWaste is True:
-                        self.scanAndParse(entry, self.bioData)
+                        scanAndParse(entry, self.bioData)
                         self.checkForNearest(self.bioData)
 
                     # if we have all data, leave loop
@@ -792,6 +758,40 @@ def calculateAlarmLevel(wasteDate):
         else:
             smallerTxt = "{} ({} Tage)".format(smallerTxt, delta.days)
     return [level, smallerTxt]
+
+
+def scanAndParse(entry, wasteData: WasteData):
+    image = None
+    now = datetime.now().date()
+    try:
+        image = tag.find("img")
+    except Exception as e:
+        pass
+    if (
+        wasteData.isEmpty()
+        and entry['category'] == wasteData.category 
+        ): 
+        Domoticz.Debug("found matching entry for {}".format(wasteData.wasteType))
+        try:
+            
+            if entry['serviceDate_actual'] is not None :
+                service_date = datetime.strptime( entry['serviceDate_actual'], "%d.%m.%Y").date()
+                wasteData.wasteDate = service_date
+                wasteData.wasteType = entry['category']
+                wasteData.wasteHint = entry['warningText']
+                if image is not None:
+                    wasteData.wasteImage = image["src"]
+                    Domoticz.Debug("img: {}".format(image))
+            else:
+                Domoticz.Debug("Skip entry,no date... {}".format(entry['serviceDate_actual']))
+            
+        except Exception as e:
+            Domoticz.Error(
+                "Could not parse content -> data {}\tentry {} ... exc: {} ".format(
+                    wasteData, entry, e
+                )
+            )
+    return wasteData
 
 def getDate(sDate: str, sFormat: str):
     """Parse string to date object.
