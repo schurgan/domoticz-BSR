@@ -25,7 +25,7 @@ This plugin is open source.
     - clone the project
         ```bash
         cd domoticz/plugins
-        git clone https://github.com/belzetrigger/domoticz-BSR.git
+        git clone https://github.com/schurgan/domoticz-BSR.git
         ```
 - or just download, unzip and copy to `domoticz/plugins` 
 - no need on Raspbian for sys path adaption if using sudo for pip3
