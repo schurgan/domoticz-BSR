@@ -643,13 +643,9 @@ class Bsr(BlzHelperInterface):
                         continue
                     service_date = datetime.strptime(service_date_str, "%d.%m.%Y").date()
                     if service_date < now:
-                        invalid_entries.append({
-                            "reason": "serviceDate_actual not in future",
-                            "date": date_str,
-                            "category": category,
-                            "entry": entry
-                        })
-                        continue
+                       # alter Termin, aber Daten trotzdem speichern, um None zu vermeiden
+                       Domoticz.Debug(f"Service date {service_date} in past, skipping for display but keeping object.")
+                       # nicht continue!
 
                     # take  care about it:
                     if self.showHouseholdWaste is True:
