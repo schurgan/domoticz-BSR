@@ -759,9 +759,7 @@ def calculateAlarmLevel(wasteDate):
             smallerTxt = "{} ({} Tage)".format(smallerTxt, delta.days)
     return [level, smallerTxt]
 
-
-@staticmethod
-def scanAndParse(self, entry, wasteData: WasteData):
+def scanAndParse(entry, wasteData: WasteData):
     image = None
     now = datetime.now().date()
     try:
