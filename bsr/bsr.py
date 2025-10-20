@@ -697,7 +697,7 @@ class Bsr(BlzHelperInterface):
                 if all_data_found:
                     break # Äußere Schleife verlassen
 
-            Domoticz.Log(
+            Domoticz.Debug(
                 "BSR: #4.4\t gelber Sack {}\tHausmuell {} ".format(
                     self.recycleData.getDate(), self.restData.getDate()
                 )
