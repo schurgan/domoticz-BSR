@@ -653,14 +653,14 @@ class Bsr(BlzHelperInterface):
 
                     # take  care about it:
                     if self.showHouseholdWaste is True:
-                        scanAndParse(entry, self.restData)
+                        self.scanAndParse(entry, self.restData)
                         self.checkForNearest(self.restData)
                     if self.showRecycleWaste is True:
-                        scanAndParse(entry, self.recycleData)
+                        self.scanAndParse(entry, self.recycleData)
                         self.checkForNearest(self.recycleData)
 
                     if self.showBioWaste is True:
-                        scanAndParse(entry, self.bioData)
+                        self.scanAndParse(entry, self.bioData)
                         self.checkForNearest(self.bioData)
 
                     # if we have all data, leave loop
