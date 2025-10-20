@@ -31,8 +31,7 @@ import sys
 try:
     from bs4 import BeautifulSoup
 except Exception as e:
-    Domoticz.Error("Error import BeautifulSoup".format(e))
-
+    Domoticz.Error(f"Error import BeautifulSoup: {e}")
 try:
     import requests
 except Exception as e:
