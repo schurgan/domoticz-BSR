@@ -117,8 +117,7 @@ class BasePlugin:
         self.errorCounter = 0
         # init with next poll to avoid NONE validation
         self.lastUpdate = self.nextpoll
-        self.pollinterval = DEFAULT_POLL_INTERVAL_HOURS
-        self.bsr = None        
+        self.pollinterval = DEFAULT_POLL_INTERVAL_HOURS     
         return
 
     def onStart(self):
