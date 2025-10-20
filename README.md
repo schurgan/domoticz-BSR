@@ -1,9 +1,9 @@
 # domoticz-BSR
-[![PyPI pyversions](https://img.shields.io/badge/python-3.9-blue.svg)]() [![Plugin version](https://img.shields.io/badge/version-3.0.0.-red.svg)](https://github.com/belzetrigger/domoticz-BSR/branches/)
+[![PyPI pyversions](https://img.shields.io/badge/python-3.9-blue.svg)]() [![Plugin version](https://img.shields.io/badge/version-3.0.0.-red.svg)](https://github.com/schurgan/domoticz-BSR/branches/)
 
 Domoticz plugin that gets data of public waste collection for Berlin from the website of the [Berliner Stadtreinigungsbetriebe](http://www.bsr.de/).
 
-![settings](https://github.com/belzetrigger/domoticz-BSR/raw/master/resources/unit_all_warning.PNG)
+![settings](https://github.com/schurgan/domoticz-BSR/raw/master/resources/unit_all_warning.PNG)
 
 ## Summary
 This is a virtual hardware plugin that adds information about collecting days  from [bsr.de](https://www.bsr.de/abfuhrkalender-20520.php)  to your [Domoticz](https://www.domoticz.com/) interface. 
@@ -50,7 +50,7 @@ This plugin is open source.
    - remember exactly the street name found for your address. Eg 'Kochstr.' instead of 'Kochstrasse'
    - if recycling is not collected at your house number, try the neighbors.  eg. using 10 instead of 10f
 
-![settings](https://github.com/belzetrigger/domoticz-BSR/raw/master/resources/settings.PNG)
+![settings](https://github.com/schurgan/domoticz-BSR/raw/master/resources/settings.PNG)
 
 
     - Street:
