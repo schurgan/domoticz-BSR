@@ -668,17 +668,17 @@ class Bsr(BlzHelperInterface):
 
                     # === KORREKTUR: Effizienteres Parsing & Weihnachtsbaum-Logik ===
                     if self.showHouseholdWaste is True and category == Bsr.HOUSEHOLD_CAT:
-                        scanAndParse(entry, self.restData)
+                        self.scanAndParse(entry, self.restData)
                         self.checkForNearest(self.restData)
                     elif self.showRecycleWaste is True and category == Bsr.RECYCLE_CAT:
-                        scanAndParse(entry, self.recycleData)
+                        self.scanAndParse(entry, self.recycleData)
                         self.checkForNearest(self.recycleData)
                     elif self.showBioWaste is True and category == Bsr.BIO_CAT:
-                        scanAndParse(entry, self.bioData)
+                        self.scanAndParse(entry, self.bioData)
                         self.checkForNearest(self.bioData)
                     elif self.showXmasWaste is True and self.timeToShowXms() is True and category == Bsr.XMASTREE_CAT:
                         # Xmas-Logik hier integriert
-                        scanAndParse(entry, self.xmasData)
+                        self.scanAndParse(entry, self.xmasData)
                         self.checkForNearest(self.xmasData)
                     # === ENDE KORREKTUR PARSING ===
 
