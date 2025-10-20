@@ -665,7 +665,6 @@ class Bsr(BlzHelperInterface):
                         continue
                     # === ENDE KORREKTUR DATUMSPRÜFUNG ===
 
-
                     # === KORREKTUR: Effizienteres Parsing & Weihnachtsbaum-Logik ===
                     if self.showHouseholdWaste is True and category == Bsr.HOUSEHOLD_CAT:
                         self.scanAndParse(entry, self.restData)
@@ -769,7 +768,7 @@ def calculateAlarmLevel(wasteDate):
     return [level, smallerTxt]
 
 
-def scanAndParse(entry, wasteData: WasteData):
+def scanAndParse(self, entry, wasteData: WasteData):
     image = None  # JSON enthält aktuell keine Bilder
     now = datetime.now().date()
 
