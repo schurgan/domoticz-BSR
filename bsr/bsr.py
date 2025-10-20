@@ -759,40 +759,6 @@ def calculateAlarmLevel(wasteDate):
             smallerTxt = "{} ({} Tage)".format(smallerTxt, delta.days)
     return [level, smallerTxt]
 
-
-def scanAndParse(entry, wasteData: WasteData):
-    image = None
-    now = datetime.now().date()
-    try:
-        image = tag.find("img")
-    except Exception as e:
-        pass
-    if (
-        wasteData.isEmpty()
-        and entry['category'] == wasteData.category 
-        ): 
-        Domoticz.Debug("found matching entry for {}".format(wasteData.wasteType))
-        try:
-            
-            if entry['serviceDate_actual'] is not None :
-                service_date = datetime.strptime( entry['serviceDate_actual'], "%d.%m.%Y").date()
-                wasteData.wasteDate = service_date
-                wasteData.wasteType = entry['category']
-                wasteData.wasteHint = entry['warningText']
-                if image is not None:
-                    wasteData.wasteImage = image["src"]
-                    Domoticz.Debug("img: {}".format(image))
-            else:
-                Domoticz.Debug("Skip entry,no date... {}".format(entry['serviceDate_actual']))
-            
-        except Exception as e:
-            Domoticz.Error(
-                "Could not parse content -> data {}\tentry {} ... exc: {} ".format(
-                    wasteData, entry, e
-                )
-            )
-    return wasteData
-
 def getDate(sDate: str, sFormat: str):
     """Parse string to date object.
     Trying it with datetime.strptime or time.strptime
