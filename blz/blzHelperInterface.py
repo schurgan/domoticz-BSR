@@ -43,7 +43,7 @@ class BlzHelperInterface(metaclass=Interface):
         """
         pass
 
-  @abstractfunc
+    @abstractfunc
     def dumpConfig(self):
         """just print configuration and settings to log"""
         pass
