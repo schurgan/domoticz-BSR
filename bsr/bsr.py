@@ -218,7 +218,7 @@ class Bsr(BlzHelperInterface):
             boolean -- if True -> please update the device in domoticz
         """
 
-        return self.needUpdate
+        return self.needsUpdate
 
     def dumpConfig(self):
         """just print configuration and settings to log"""
