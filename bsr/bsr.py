@@ -1,6 +1,7 @@
 # moved logic of to extra class
 import re
-from datetime import datetime, timedelta
+import datetime as dtime
+from datetime import timedelta
 from time import mktime
 import time as myTime
 
@@ -205,10 +206,10 @@ class Bsr(BlzHelperInterface):
         self.street = street
         self.number = houseNumber
         self.zip = zipCode
-        self.lastUpdate = datetime.now()
+        self.lastUpdate = dtime.datetime.now()
         self.debug = False
         self.error = False
-        self.nextpoll = datetime.now()
+        self.nextpoll = dtime.datetime.now()
         self.reset()
         return
 
@@ -367,15 +368,15 @@ class Bsr(BlzHelperInterface):
         Arguments:
             dt {WasteData} -- the data to verify
         """
-        now = datetime.now().date()
+        now = dtime.datetime.now().date()
         if dt is None or dt.getDate() is None:
             return
-        h = datetime.now().hour
-        d = datetime.now().date()
+        h = dtime.datetime.now().hour
+        d = dtime.datetime.now().date()
         if (
-            dt.getDate() == datetime.now().date()
-            and datetime.now().hour < BSR_HOUR_THRESHOLD
-        ) or dt.getDate() > datetime.now().date():
+            dt.getDate() == dtime.datetime.now().date()
+            and dtime.datetime.now().hour < BSR_HOUR_THRESHOLD
+        ) or dt.getDate() > dtime.datetime.now().date():
 
             if self.nearest is None:
                 self.nearest = dt
@@ -392,7 +393,7 @@ class Bsr(BlzHelperInterface):
         Returns:
             bool -- True or False
         """
-        if datetime.now().month == 12 or datetime.now().month == 1:
+        if dtime.datetime.now().month == 12 or dtime.datetime.now().month == 1:
             return True
         else:
             return False
@@ -413,7 +414,7 @@ class Bsr(BlzHelperInterface):
         # One line sort function method using an inline lambda function lambda x: x.date
         # The value for the key param needs to be a value that identifies the sorting property on the object
         customObjects.sort(
-            key=lambda x: x.wasteDate if (x and x.wasteDate) else datetime.now().date(),
+            key=lambda x: x.wasteDate if (x and x.wasteDate) else dtime.datetime.now().date(),
             reverse=False,
         )
         for obj in customObjects:
@@ -552,7 +553,7 @@ class Bsr(BlzHelperInterface):
             raise Exception("Did not find a relevant number")
         
         # Get today's date and date 4 weeks ahead
-        today = datetime.today()
+        today = dtime.datetime.today()
         start_of_week = today - timedelta(days=today.weekday())  # Monday = 0
         four_weeks_later = today + timedelta(weeks=4)
 
@@ -605,7 +606,7 @@ class Bsr(BlzHelperInterface):
             # Domoticz.Debug('Retrieve waste collection data from ' + self.bsrUrl)
             r = self.requestWasteData()
             # Today (just date, no time part)
-            now = datetime.now().date()
+            now = dtime.datetime.now().date()
 
             Domoticz.Debug("BSR: #4 Parse Data (without Xmas")
             if self.debugResponse is True:
@@ -642,7 +643,7 @@ class Bsr(BlzHelperInterface):
 
                         })
                         continue
-                    service_date = datetime.strptime(service_date_str, "%d.%m.%Y").date()
+                    service_date = dtime.datetime.strptime(service_date_str, "%d.%m.%Y").date()
                     if service_date <= now:
                         invalid_entries.append({
                             "reason": "serviceDate_actual not in future",
@@ -714,7 +715,7 @@ class Bsr(BlzHelperInterface):
             #         if self.xmasData.isComplete() is True:
             #             break
             # only set last Update time if success
-            self.lastUpdate = datetime.now()
+            self.lastUpdate = dtime.datetime.now()
         except Exception as e:
             Domoticz.Error("BSR EXCEPTION: {}".format(e))
             Domoticz.Error("BSR TRACEBACK:\n{}".format(traceback.format_exc()))
@@ -740,7 +741,7 @@ def calculateAlarmLevel(wasteDate):
     level = 1
     smallerTxt = ""
     if wasteDate is not None:
-        delta = wasteDate - datetime.now().date()
+        delta = wasteDate - dtime.datetime.now().date()
         # Level = (0=gray, 1=green, 2=yellow, 3=orange, 4=red)
         if delta.days <= 1:
             level = 4
@@ -764,7 +765,7 @@ def calculateAlarmLevel(wasteDate):
 
 def scanAndParse(entry, wasteData: WasteData):
     image = None
-    now = datetime.now().date()
+    now = dtime.datetime.now().date()
     try:
         image = tag.find("img")
     except Exception as e:
@@ -777,7 +778,7 @@ def scanAndParse(entry, wasteData: WasteData):
         try:
             
             if entry['serviceDate_actual'] is not None :
-                service_date = datetime.strptime( entry['serviceDate_actual'], "%d.%m.%Y").date()
+                service_date = dtime.datetime.strptime( entry['serviceDate_actual'], "%d.%m.%Y").date()
                 wasteData.wasteDate = service_date
                 wasteData.wasteType = entry['category']
                 wasteData.wasteHint = entry['warningText']
@@ -797,7 +798,7 @@ def scanAndParse(entry, wasteData: WasteData):
 
 def getDate(sDate: str, sFormat: str):
     """Parse string to date object.
-    Trying it with datetime.strptime or time.strptime
+    Trying it with dtime.datetime.strptime or time.strptime
     Helps walking around different domoticz behavior between
     start up and update.
     Arguments:
@@ -816,7 +817,7 @@ def getDate(sDate: str, sFormat: str):
 
 def getDatetime(sDate: str, sFormat: str):
     """Parse string to datetime object.
-        Trying it with datetime.strptime or time.strptime
+        Trying it with dtime.datetime.strptime or time.strptime
     Helps walking around different domoticz behavior between
     start up and update.
     Arguments:
@@ -828,7 +829,7 @@ def getDatetime(sDate: str, sFormat: str):
     dt = None
     myDate = None
     try:
-        dt = datetime.strptime(sDate, sFormat)
+        dt = dtime.datetime.strptime(sDate, sFormat)
     except TypeError:
         dt = datetime(*(myTime.strptime(sDate, sFormat)[0:6]))
     return dt
