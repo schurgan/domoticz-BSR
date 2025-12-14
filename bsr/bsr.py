@@ -774,36 +774,42 @@ def calculateAlarmLevel(wasteDate):
 
 
 def scanAndParse(entry, wasteData: WasteData):
-    image = None
-    now = dtime.datetime.now().date()
+    # JSON-Parser (kein HTML mehr)
+
+    # Nur parsen, wenn dieser Abfalltyp noch leer ist und die Kategorie passt
+    if not (wasteData.isEmpty() and entry.get("category") == wasteData.category):
+        return wasteData
+
+    Domoticz.Debug("found matching entry for {}".format(wasteData.wasteType))
+
+    service_date_str = entry.get("serviceDate_actual")
+    if not service_date_str:
+        Domoticz.Debug("Skip entry, no date... {}".format(service_date_str))
+        return wasteData
+
+    # Restart-sicher: dd.mm.yyyy manuell splitten und datetime.date aus Stdlib holen
     try:
-        image = tag.find("img")
+        d, m, y = service_date_str.split(".")
+        import importlib
+        _dt = importlib.import_module("datetime")
+        wasteData.wasteDate = _dt.date(int(y), int(m), int(d))
     except Exception as e:
-        pass
-    if (
-        wasteData.isEmpty()
-        and entry['category'] == wasteData.category 
-        ): 
-        Domoticz.Debug("found matching entry for {}".format(wasteData.wasteType))
-        try:
-            
-            if entry['serviceDate_actual'] is not None :
-                service_date = dtime.datetime.strptime( entry['serviceDate_actual'], "%d.%m.%Y").date()
-                wasteData.wasteDate = service_date
-                wasteData.wasteType = entry['category']
-                wasteData.wasteHint = entry['warningText']
-                if image is not None:
-                    wasteData.wasteImage = image["src"]
-                    Domoticz.Debug("img: {}".format(image))
-            else:
-                Domoticz.Debug("Skip entry,no date... {}".format(entry['serviceDate_actual']))
-            
-        except Exception as e:
-            Domoticz.Error(
-                "Could not parse content -> data {}\tentry {} ... exc: {} ".format(
-                    wasteData, entry, e
-                )
+        import traceback
+        Domoticz.Error(
+            "Could not parse content -> data {}\tentry {} ... exc: {} ".format(
+                wasteData, entry, e
             )
+        )
+        Domoticz.Error("TRACE:\n{}".format(traceback.format_exc()))
+        return wasteData
+
+    # Restliche Felder übernehmen
+    wasteData.wasteType = entry.get("category")
+    wasteData.wasteHint = entry.get("warningText")
+    wasteData.serviceDay = entry.get("serviceDay")
+    wasteData.servieDate_regular = entry.get("serviceDate_regular")
+    wasteData.rhythm = entry.get("rhythm")
+
     return wasteData
 
 def getDate(sDate: str, sFormat: str):
