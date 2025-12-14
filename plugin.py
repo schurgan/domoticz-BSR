@@ -132,6 +132,12 @@ class BasePlugin:
             Domoticz.Debugging(0)
 
         Domoticz.Debug("onStart called")
+                # Beim Plugin-Restart bleibt bsr.bsr im Speicher -> neu laden erzwingen
+        import sys
+        import importlib
+        if "bsr.bsr" in sys.modules:
+            Domoticz.Log("BSR: reloading module bsr.bsr (plugin restart)")
+            importlib.reload(sys.modules["bsr.bsr"])
 
         self.street = Parameters["Mode1"]
         self.zip = Parameters["Mode2"]
@@ -204,6 +210,8 @@ class BasePlugin:
         Domoticz.Log(
             "Using polling interval of {} seconds".format(str(self.pollinterval))
         )
+        
+        from bsr.bsr import Bsr
 
         self.bsr = Bsr(
             self.street,
