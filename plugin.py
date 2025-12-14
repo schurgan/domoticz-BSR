@@ -83,6 +83,7 @@ from datetime import datetime, timedelta
 from math import asin, cos, radians, sin, sqrt
 from os import path
 import sys
+import traceback
 
 sys.path
 # synlogy
@@ -246,7 +247,11 @@ class BasePlugin:
         # Domoticz.Debug("now: {} last: {}".format(myNow.day, self.lastUpdate.day))
         if myNow >= self.nextpoll or (myNow.day != self.lastUpdate.day):
             Domoticz.Debug("----------------------------------------------------")
-            self.bsr.readBsrWasteCollection()
+            try:
+                self.bsr.readBsrWasteCollection()
+            except Exception:
+                Domoticz.Error("BSR: Exception:\n{}".format(traceback.format_exc()))
+                raise
 
             alarmLevel = 0
             summary = "No data"
