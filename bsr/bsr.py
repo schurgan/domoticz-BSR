@@ -650,10 +650,12 @@ class Bsr(BlzHelperInterface):
                     if "datetime" in sys.modules and sys.modules["datetime"] is None:
                         del sys.modules["datetime"]
 
-                    _dtmod = importlib.import_module("datetime")
-                    Domoticz.Error("DEBUG datetime module: {}".format(getattr(_dtmod, "__file__", "NO_FILE_ATTR")))
-                    Domoticz.Error("DEBUG datetime.datetime: {!r}  strptime={!r}".format(getattr(_dtmod, "datetime", None), getattr(getattr(_dtmod, "datetime", None), "strptime", None)))
-                    service_date = _dtmod.datetime.strptime(service_date_str, "%d.%m.%Y").date()
+                    from datetime import date as _date
+
+      # robustes Parsen ohne datetime.strptime (stabil bei Plugin-Restarts)
+                   t = myTime.strptime(service_date_str, "%d.%m.%Y")
+                   service_date = _date(t.tm_year, t.tm_mon, t.tm_mday)
+
                     if service_date <= now:
                         invalid_entries.append({
                             "reason": "serviceDate_actual not in future",
