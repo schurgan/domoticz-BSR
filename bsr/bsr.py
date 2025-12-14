@@ -760,7 +760,7 @@ def calculateAlarmLevel(wasteDate):
     return [level, smallerTxt]
 
 
-def scanAndParse(entry, wasteData: WasteData):
+def scanAndParseEntry(entry, wasteData: WasteData):
     image = None
     now = datetime.now().date()
     if (
