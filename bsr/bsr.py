@@ -401,38 +401,37 @@ class Bsr(BlzHelperInterface):
 
     def getSummary(self, seperator: str = "<br>"):
 
-        customObjects = []
-        summary = ""
-        if self.showHouseholdWaste:
-            customObjects.append(self.restData)
-        if self.showRecycleWaste:
-            customObjects.append(self.recycleData)
-        if self.showBioWaste:
-            customObjects.append(self.bioData)
-        if self.showXmasWaste is True and self.timeToShowXms() is True:
-            customObjects.append(self.xmasData)
+    customObjects = []
+    lines = []
 
-        # One line sort function method using an inline lambda function lambda x: x.date
-        # The value for the key param needs to be a value that identifies the sorting property on the object
-        from datetime import date as _date
-        
-        customObjects.sort(
-            key=lambda x: x.wasteDate if (x and x.wasteDate) else _date(2999, 1, 1),
-            reverse=False,
-        )
-        for obj in customObjects:
-            # Leere Einträge komplett ausblenden
-            if obj is None or obj.wasteDate is None:
-                continue
+    if self.showHouseholdWaste:
+        customObjects.append(self.restData)
+    if self.showRecycleWaste:
+        customObjects.append(self.recycleData)
+    if self.showBioWaste:
+        customObjects.append(self.bioData)
+    if self.showXmasWaste and self.timeToShowXms():
+        customObjects.append(self.xmasData)
 
-            Domoticz.Debug("Sorted: " + str(obj.wasteDate) + ":  " + obj.wasteType)
-            summary = summary + obj.getLongStatus() + seperator
+    # Sortieren
+    customObjects.sort(
+        key=lambda x: x.wasteDate if x and x.wasteDate else datetime.max.date()
+    )
 
-        # Falls wirklich gar nichts da ist:
-        if summary == "":
-            summary = "Keine Termine gefunden" + seperator
+    for obj in customObjects:
+        if obj is None or obj.wasteDate is None:
+            continue
 
-        return summary
+        text = obj.getLongStatus().strip()
+
+        # nur echte Inhalte übernehmen
+        if text:
+            lines.append(text)
+
+    if not lines:
+        return "Keine Termine gefunden"
+
+    return seperator.join(lines)
 
     # check which date is smaller
     # if ((result[0] and result[1]) and result[0] < result[1] ) or (result[0] and not result[1]):
