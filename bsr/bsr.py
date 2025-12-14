@@ -432,7 +432,7 @@ class Bsr(BlzHelperInterface):
         if summary == "":
         summary = "Keine Termine gefunden" + seperator
 
-    return summary
+        return summary
 
     # check which date is smaller
     # if ((result[0] and result[1]) and result[0] < result[1] ) or (result[0] and not result[1]):
