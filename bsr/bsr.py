@@ -205,10 +205,10 @@ class Bsr(BlzHelperInterface):
         self.street = street
         self.number = houseNumber
         self.zip = zipCode
-        self.lastUpdate = dt.datetime.now()
+        self.lastUpdate = datetime.now()
         self.debug = False
         self.error = False
-        self.nextpoll = dt.datetime.now()
+        self.nextpoll = datetime.now()
         self.reset()
         return
 
@@ -392,7 +392,7 @@ class Bsr(BlzHelperInterface):
         Returns:
             bool -- True or False
         """
-        if dt.datetime.now().month == 12 or dt.datetime.now().month == 1:
+        if datetime.now().month == 12 or datetime.now().month == 1:
             return True
         else:
             return False
@@ -413,7 +413,7 @@ class Bsr(BlzHelperInterface):
         # One line sort function method using an inline lambda function lambda x: x.date
         # The value for the key param needs to be a value that identifies the sorting property on the object
         customObjects.sort(
-            key=lambda x: x.wasteDate if (x and x.wasteDate) else dt.datetime.now().date(),
+            key=lambda x: x.wasteDate if (x and x.wasteDate) else datetime.now().date(),
             reverse=False,
         )
         for obj in customObjects:
@@ -552,7 +552,7 @@ class Bsr(BlzHelperInterface):
             raise Exception("Did not find a relevant number")
         
         # Get today's date and date 4 weeks ahead
-        today = dt.datetime.today()
+        today = datetime.today()
         start_of_week = today - timedelta(days=today.weekday())  # Monday = 0
         four_weeks_later = today + timedelta(weeks=4)
 
@@ -602,14 +602,10 @@ class Bsr(BlzHelperInterface):
         """
 
         try:
-            # Wichtig bei Plugin-Restart: alten Zustand wegwerfen
-            self.reinitData()
-            self.nearest = None
-            self.needUpdate = True
             # Domoticz.Debug('Retrieve waste collection data from ' + self.bsrUrl)
             r = self.requestWasteData()
             # Today (just date, no time part)
-            now = dt.datetime.now().date()
+            now = datetime.now().date()
 
             Domoticz.Debug("BSR: #4 Parse Data (without Xmas")
             if self.debugResponse is True:
@@ -646,7 +642,7 @@ class Bsr(BlzHelperInterface):
 
                         })
                         continue
-                    service_date = dt.datetime.strptime(service_date_str, "%d.%m.%Y").date()
+                    service_date = datetime.strptime(service_date_str, "%d.%m.%Y").date()
                     if service_date <= now:
                         invalid_entries.append({
                             "reason": "serviceDate_actual not in future",
@@ -658,13 +654,14 @@ class Bsr(BlzHelperInterface):
 
                     # take  care about it:
                     if self.showHouseholdWaste is True:
-                        globals()["scanAndParseEntry"](entry, self.restData)
+                        scanAndParse(entry, self.restData)
                         self.checkForNearest(self.restData)
                     if self.showRecycleWaste is True:
-                        globals()["scanAndParseEntry"](entry, self.recycleData)
+                        scanAndParse(entry, self.recycleData)
                         self.checkForNearest(self.recycleData)
+
                     if self.showBioWaste is True:
-                        globals()["scanAndParseEntry"](entry, self.bioData)
+                        scanAndParse(entry, self.bioData)
                         self.checkForNearest(self.bioData)
 
                     # if we have all data, leave loop
@@ -717,11 +714,10 @@ class Bsr(BlzHelperInterface):
             #         if self.xmasData.isComplete() is True:
             #             break
             # only set last Update time if success
-            self.lastUpdate = dt.datetime.now()
-        except Exception as e:
-            Domoticz.Error("BSR EXCEPTION: {}".format(e))
-            Domoticz.Error("BSR TRACEBACK:\n{}".format(traceback.format_exc()))
-            self.setError(str(e))
+            self.lastUpdate = datetime.now()
+        except (Exception) as e:
+            Domoticz.Error("Error: {} used paths: {} ".format(e, sys.path))
+            self.setError(e)
             return
 
 
@@ -743,7 +739,7 @@ def calculateAlarmLevel(wasteDate):
     level = 1
     smallerTxt = ""
     if wasteDate is not None:
-        delta = wasteDate - dt.datetime.now().date()
+        delta = wasteDate - datetime.now().date()
         # Level = (0=gray, 1=green, 2=yellow, 3=orange, 4=red)
         if delta.days <= 1:
             level = 4
@@ -765,9 +761,13 @@ def calculateAlarmLevel(wasteDate):
     return [level, smallerTxt]
 
 
-def scanAndParseEntry(entry, wasteData: WasteData):
+def scanAndParse(entry, wasteData: WasteData):
     image = None
-    now = dt.datetime.now().date()
+    now = datetime.now().date()
+    try:
+        image = tag.find("img")
+    except Exception as e:
+        pass
     if (
         wasteData.isEmpty()
         and entry['category'] == wasteData.category 
@@ -776,7 +776,7 @@ def scanAndParseEntry(entry, wasteData: WasteData):
         try:
             
             if entry['serviceDate_actual'] is not None :
-                service_date = dt.datetime.strptime( entry['serviceDate_actual'], "%d.%m.%Y").date()
+                service_date = datetime.strptime( entry['serviceDate_actual'], "%d.%m.%Y").date()
                 wasteData.wasteDate = service_date
                 wasteData.wasteType = entry['category']
                 wasteData.wasteHint = entry['warningText']
@@ -796,7 +796,7 @@ def scanAndParseEntry(entry, wasteData: WasteData):
 
 def getDate(sDate: str, sFormat: str):
     """Parse string to date object.
-    Trying it with dt.datetime.strptime or time.strptime
+    Trying it with datetime.strptime or time.strptime
     Helps walking around different domoticz behavior between
     start up and update.
     Arguments:
@@ -815,7 +815,7 @@ def getDate(sDate: str, sFormat: str):
 
 def getDatetime(sDate: str, sFormat: str):
     """Parse string to datetime object.
-        Trying it with dt.datetime.strptime or time.strptime
+        Trying it with datetime.strptime or time.strptime
     Helps walking around different domoticz behavior between
     start up and update.
     Arguments:
@@ -827,7 +827,7 @@ def getDatetime(sDate: str, sFormat: str):
     dt = None
     myDate = None
     try:
-        dt = dt.datetime.strptime(sDate, sFormat)
+        dt = datetime.strptime(sDate, sFormat)
     except TypeError:
         dt = datetime(*(myTime.strptime(sDate, sFormat)[0:6]))
     return dt
