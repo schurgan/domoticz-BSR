@@ -401,35 +401,37 @@ class Bsr(BlzHelperInterface):
 
     def getSummary(self, seperator: str = "<br>"):
 
-        customObjects = []
-        lines = []
+    customObjects = []
+    lines = []
 
-        if self.showHouseholdWaste:
-            customObjects.append(self.restData)
-        if self.showRecycleWaste:
-            customObjects.append(self.recycleData)
-        if self.showBioWaste:
-            customObjects.append(self.bioData)
-        if self.showXmasWaste and self.timeToShowXms():
-            customObjects.append(self.xmasData)
+    if self.showHouseholdWaste:
+        customObjects.append(self.restData)
+    if self.showRecycleWaste:
+        customObjects.append(self.recycleData)
+    if self.showBioWaste:
+        customObjects.append(self.bioData)
+    if self.showXmasWaste and self.timeToShowXms():
+        customObjects.append(self.xmasData)
 
-        # Sortieren
-        customObjects.sort(
-            key=lambda x: x.wasteDate if x and x.wasteDate else datetime.max.date()
-        )
-        for obj in customObjects:
-            if obj is None or obj.wasteDate is None:
-                continue
+    # Sortieren
+    customObjects.sort(
+        key=lambda x: x.wasteDate if x and x.wasteDate else datetime.max.date()
+    )
 
-            text = obj.getLongStatus().strip()
+    for obj in customObjects:
+        if obj is None or obj.wasteDate is None:
+            continue
 
-            # nur echte Inhalte übernehmen
-            if text:
-                lines.append(text)
-        if not lines:
-            return "Keine Termine gefunden"
+        text = obj.getLongStatus().strip()
 
-        return seperator.join(lines)
+        # nur echte Inhalte übernehmen
+        if text:
+            lines.append(text)
+
+    if not lines:
+        return "Keine Termine gefunden"
+
+    return seperator.join(lines)
 
     # check which date is smaller
     # if ((result[0] and result[1]) and result[0] < result[1] ) or (result[0] and not result[1]):
