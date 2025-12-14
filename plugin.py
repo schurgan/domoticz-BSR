@@ -102,8 +102,10 @@ except ImportError:
 try:
     from bsr.bsr import Bsr
 except Exception as e:
-    Domoticz.Error("could not load bsr lib")
-    pass
+    import traceback
+    Domoticz.Error("could not load bsr lib: {}".format(e))
+    Domoticz.Error("IMPORT TRACEBACK:\n{}".format(traceback.format_exc()))
+    raise
 
 
 POLL_THRESHOLD_MIN_HOURS =  6 #:minimum time in hours to fetch new data
