@@ -237,6 +237,10 @@ class BasePlugin:
         )
 
     def onHeartbeat(self):
+                # Heartbeat kann kommen, bevor onStart() fertig ist (Plugin-Restart)
+        if not hasattr(self, "bsr") or self.bsr is None:
+            Domoticz.Log("BSR: bsr not initialized yet -> skip heartbeat")
+            return
         modulename = "bs4"
         if modulename not in sys.modules:
             Domoticz.Log("{} not imported".format(modulename))
