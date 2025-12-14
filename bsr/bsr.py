@@ -401,39 +401,38 @@ class Bsr(BlzHelperInterface):
 
     def getSummary(self, seperator: str = "<br>"):
 
-    customObjects = []
-    lines = []
+        customObjects = []
+        lines = []
 
-    if self.showHouseholdWaste:
-        customObjects.append(self.restData)
-    if self.showRecycleWaste:
-        customObjects.append(self.recycleData)
-    if self.showBioWaste:
-        customObjects.append(self.bioData)
-    if self.showXmasWaste is True and self.timeToShowXms() is True:
-        customObjects.append(self.xmasData)
+        if self.showHouseholdWaste:
+            customObjects.append(self.restData)
+        if self.showRecycleWaste:
+            customObjects.append(self.recycleData)
+        if self.showBioWaste:
+            customObjects.append(self.bioData)
+        if self.showXmasWaste is True and self.timeToShowXms() is True:
+            customObjects.append(self.xmasData)
 
-    # Leere Einträge ans Ende sortieren
-    from datetime import date as _date
-    customObjects.sort(
-        key=lambda x: x.wasteDate if (x and x.wasteDate) else _date(2999, 1, 1),
-        reverse=False,
-    )
+        # Leere Einträge ans Ende sortieren
+        from datetime import date as _date
+        customObjects.sort(
+            key=lambda x: x.wasteDate if (x and x.wasteDate) else _date(2999, 1, 1),
+            reverse=False,
+        )
 
-    for obj in customObjects:
-        # Leere Einträge komplett ausblenden
-        if obj is None or obj.wasteDate is None:
-            continue
+        for obj in customObjects:
+            # Leere Einträge komplett ausblenden
+            if obj is None or obj.wasteDate is None:
+                continue
 
-        text = obj.getLongStatus().strip()
-        if text:
-            lines.append(text)
+            text = obj.getLongStatus().strip()
+            if text:
+                lines.append(text)
 
-    if not lines:
-        return "Keine Termine gefunden"
+        if not lines:
+            return "Keine Termine gefunden"
 
-    return seperator.join(lines)
-
+        return seperator.join(lines)
 
     def setError(self, error):
         """sets the error msg and put error flag to True
