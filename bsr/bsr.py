@@ -401,24 +401,23 @@ class Bsr(BlzHelperInterface):
 
     def getSummary(self, seperator: str = "<br>"):
 
-    customObjects = []
-    lines = []
+        customObjects = []
+        lines = []
 
-    if self.showHouseholdWaste:
-        customObjects.append(self.restData)
-    if self.showRecycleWaste:
-        customObjects.append(self.recycleData)
-    if self.showBioWaste:
-        customObjects.append(self.bioData)
-    if self.showXmasWaste and self.timeToShowXms():
-        customObjects.append(self.xmasData)
+        if self.showHouseholdWaste:
+            customObjects.append(self.restData)
+        if self.showRecycleWaste:
+            customObjects.append(self.recycleData)
+        if self.showBioWaste:
+            customObjects.append(self.bioData)
+        if self.showXmasWaste and self.timeToShowXms():
+            customObjects.append(self.xmasData)
 
-    # Sortieren
-    customObjects.sort(
-        key=lambda x: x.wasteDate if x and x.wasteDate else datetime.max.date()
-    )
-
-    for obj in customObjects:
+        # Sortieren
+        customObjects.sort(
+            key=lambda x: x.wasteDate if x and x.wasteDate else datetime.max.date()
+        )
+        for obj in customObjects:
         if obj is None or obj.wasteDate is None:
             continue
 
