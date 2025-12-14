@@ -1,5 +1,5 @@
 # domoticz-BSR
-[![PyPI pyversions](https://img.shields.io/badge/python-3.9-blue.svg)]() [![Plugin version](https://img.shields.io/badge/version-3.0.0.-red.svg)](https://github.com/belzetrigger/domoticz-BSR/branches/)
+[![PyPI pyversions](https://img.shields.io/badge/python-3.9-blue.svg)]() [![Plugin version](https://img.shields.io/badge/version-3.0.1.-red.svg)](https://github.com/belzetrigger/domoticz-BSR/branches/)
 
 Domoticz plugin that gets data of public waste collection for Berlin from the website of the [Berliner Stadtreinigungsbetriebe](http://www.bsr.de/).
 
@@ -94,6 +94,7 @@ Based on https://github.com/ffes/domoticz-buienradar/ there are
 ## ChangeLog
 | Version | Note                                                                                     |
 | ------- | ---------------------------------------------------------------------------------------- |
+| 3.0.1   | Kleine Schönheitskorrekturen |
 | 3.0.0   | changed to new API from BSR |
 | 2.0.0   | rebuild project structure |
 | 1.1.7   | bugfix, forgot to clear data storage before reading them from web service |
