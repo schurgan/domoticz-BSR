@@ -143,9 +143,8 @@ class WasteData:
         return "{} {} {} {}".format(
             d,
             i,
-            # '-' if self.wasteDate is None else self.wasteDate,
             self.getTypeLongName(),
-            "" if self.wasteHint is None else "(" + self.wasteHint + ")",
+            "(" + self.wasteHint + ")" if self.wasteHint else "",
         )
 
     def isComplete(self):
