@@ -80,7 +80,8 @@ class WasteData:
         return self.wasteType
     
     def getTypeLongName(self):
-        return Bsr.category_names.get(self.wasteType)
+    # Falls kein Mapping existiert: nimm einfach den vorhandenen Text
+        return Bsr.category_names.get(self.wasteType, self.wasteType)
 
     def getImage(self):
         return self.wasteImage
