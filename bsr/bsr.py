@@ -410,21 +410,22 @@ class Bsr(BlzHelperInterface):
         customObjects.append(self.recycleData)
     if self.showBioWaste:
         customObjects.append(self.bioData)
-    if self.showXmasWaste and self.timeToShowXms():
+    if self.showXmasWaste is True and self.timeToShowXms() is True:
         customObjects.append(self.xmasData)
 
-    # Sortieren
+    # Leere Einträge ans Ende sortieren
+    from datetime import date as _date
     customObjects.sort(
-        key=lambda x: x.wasteDate if x and x.wasteDate else datetime.max.date()
+        key=lambda x: x.wasteDate if (x and x.wasteDate) else _date(2999, 1, 1),
+        reverse=False,
     )
 
     for obj in customObjects:
+        # Leere Einträge komplett ausblenden
         if obj is None or obj.wasteDate is None:
             continue
 
         text = obj.getLongStatus().strip()
-
-        # nur echte Inhalte übernehmen
         if text:
             lines.append(text)
 
@@ -433,16 +434,6 @@ class Bsr(BlzHelperInterface):
 
     return seperator.join(lines)
 
-    # check which date is smaller
-    # if ((result[0] and result[1]) and result[0] < result[1] ) or (result[0] and not result[1]):
-    #     smallerDate = result[0]
-    #     smallerTxt = 'MÃ¼ll {}'.format( smallerDate );
-    # elif (result[0] and result[1]) and result[0] > result[1] or (not result[0] and result[1]):
-    #     smallerDate = result[1]
-    #     smallerTxt = 'Gelber Sack {}'.format( smallerDate );
-    # else:
-    #     smallerDate = None
-    #     smallerTxt = 'FEHLER';
 
     def setError(self, error):
         """sets the error msg and put error flag to True
