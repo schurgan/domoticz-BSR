@@ -651,6 +651,8 @@ class Bsr(BlzHelperInterface):
                         del sys.modules["datetime"]
 
                     _dtmod = importlib.import_module("datetime")
+                    Domoticz.Error("DEBUG datetime module: {}".format(getattr(_dtmod, "__file__", "NO_FILE_ATTR")))
+                    Domoticz.Error("DEBUG datetime.datetime: {!r}  strptime={!r}".format(getattr(_dtmod, "datetime", None), getattr(getattr(_dtmod, "datetime", None), "strptime", None)))
                     service_date = _dtmod.datetime.strptime(service_date_str, "%d.%m.%Y").date()
                     if service_date <= now:
                         invalid_entries.append({
