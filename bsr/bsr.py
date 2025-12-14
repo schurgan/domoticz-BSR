@@ -419,18 +419,17 @@ class Bsr(BlzHelperInterface):
         )
         for obj in customObjects:
         if obj is None or obj.wasteDate is None:
-            continue
+           continue
 
         text = obj.getLongStatus().strip()
 
         # nur echte Inhalte übernehmen
         if text:
             lines.append(text)
-
-    if not lines:
+        if not lines:
         return "Keine Termine gefunden"
 
-    return seperator.join(lines)
+        return seperator.join(lines)
 
     # check which date is smaller
     # if ((result[0] and result[1]) and result[0] < result[1] ) or (result[0] and not result[1]):
