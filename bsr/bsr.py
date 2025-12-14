@@ -414,8 +414,10 @@ class Bsr(BlzHelperInterface):
 
         # One line sort function method using an inline lambda function lambda x: x.date
         # The value for the key param needs to be a value that identifies the sorting property on the object
+        from datetime import date as _date
+        
         customObjects.sort(
-            key=lambda x: x.wasteDate if (x and x.wasteDate) else dtime.datetime.now().date(),
+            key=lambda x: x.wasteDate if (x and x.wasteDate) else _date(2999, 1, 1),
             reverse=False,
         )
         for obj in customObjects:
