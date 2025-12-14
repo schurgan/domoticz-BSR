@@ -643,8 +643,15 @@ class Bsr(BlzHelperInterface):
 
                         })
                         continue
-                    from datetime import datetime as _dt
-                    service_date = _dt.strptime(service_date_str, "%d.%m.%Y").date()
+                    import sys
+                    import importlib
+
+      # datetime kann beim Plugin-Restart "vergiftet" sein -> neu laden
+                    if "datetime" in sys.modules and sys.modules["datetime"] is None:
+                        del sys.modules["datetime"]
+
+                    _dtmod = importlib.import_module("datetime")
+                    service_date = _dtmod.datetime.strptime(service_date_str, "%d.%m.%Y").date()
                     if service_date <= now:
                         invalid_entries.append({
                             "reason": "serviceDate_actual not in future",
