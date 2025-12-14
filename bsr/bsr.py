@@ -643,7 +643,8 @@ class Bsr(BlzHelperInterface):
 
                         })
                         continue
-                    service_date = dtime.datetime.strptime(service_date_str, "%d.%m.%Y").date()
+                    from datetime import datetime as _dt
+                    service_date = _dt.strptime(service_date_str, "%d.%m.%Y").date()
                     if service_date <= now:
                         invalid_entries.append({
                             "reason": "serviceDate_actual not in future",
