@@ -601,6 +601,10 @@ class Bsr(BlzHelperInterface):
         """
 
         try:
+            # Wichtig bei Plugin-Restart: alten Zustand wegwerfen
+            self.reinitData()
+            self.nearest = None
+            self.needUpdate = True
             # Domoticz.Debug('Retrieve waste collection data from ' + self.bsrUrl)
             r = self.requestWasteData()
             # Today (just date, no time part)
@@ -658,7 +662,6 @@ class Bsr(BlzHelperInterface):
                     if self.showRecycleWaste is True:
                         globals()["scanAndParseEntry"](entry, self.recycleData)
                         self.checkForNearest(self.recycleData)
-
                     if self.showBioWaste is True:
                         globals()["scanAndParseEntry"](entry, self.bioData)
                         self.checkForNearest(self.bioData)
