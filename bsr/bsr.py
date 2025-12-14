@@ -421,16 +421,16 @@ class Bsr(BlzHelperInterface):
             reverse=False,
         )
         for obj in customObjects:
-    # Leere Einträge komplett ausblenden
-        if obj is None or obj.wasteDate is None:
-        continue
+            # Leere Einträge komplett ausblenden
+            if obj is None or obj.wasteDate is None:
+                continue
 
-        Domoticz.Debug("Sorted: " + str(obj.wasteDate) + ":  " + obj.wasteType)
-        summary = summary + obj.getLongStatus() + seperator
+            Domoticz.Debug("Sorted: " + str(obj.wasteDate) + ":  " + obj.wasteType)
+            summary = summary + obj.getLongStatus() + seperator
 
-    # Falls wirklich gar nichts da ist:
+        # Falls wirklich gar nichts da ist:
         if summary == "":
-        summary = "Keine Termine gefunden" + seperator
+            summary = "Keine Termine gefunden" + seperator
 
         return summary
 
