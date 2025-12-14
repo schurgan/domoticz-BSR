@@ -15,11 +15,8 @@ This plugin is open source.
 
 
 ## Installation and Setup
-- a running Domoticz, tested with 4.10717 and 2020.1
-- Python 3
-- install needed python modules:
-  - beautifullsoup4 aka bs4
-  - you can use `sudo pip3 install -r requirements.txt` 
+- a running Domoticz, tested with 2025.2
+- Python 3.11
 - clone project
     - go to `domoticz/plugins` directory 
     - clone the project
@@ -29,6 +26,9 @@ This plugin is open source.
         ```
 - or just download, unzip and copy to `domoticz/plugins` 
 - no need on Raspbian for sys path adaption if using sudo for pip3
+- install needed python modules:
+  - beautifullsoup4 aka bs4
+  - you can use `sudo pip3 install -r requirements.txt`
 - some extra work for Windows or Synology, make sure downloaded modules are in path eg. site-packages python paths or change in plugin.py / fritzHelper.py path
   - example adaption:
     ```bash
