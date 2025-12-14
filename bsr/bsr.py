@@ -653,14 +653,14 @@ class Bsr(BlzHelperInterface):
 
                     # take  care about it:
                     if self.showHouseholdWaste is True:
-                        scanAndParse(entry, self.restData)
+                        globals()["scanAndParse"](entry, self.restData)
                         self.checkForNearest(self.restData)
                     if self.showRecycleWaste is True:
-                        scanAndParse(entry, self.recycleData)
+                        globals()["scanAndParse"](entry, self.recycleData)
                         self.checkForNearest(self.recycleData)
 
                     if self.showBioWaste is True:
-                        scanAndParse(entry, self.bioData)
+                        globals()["scanAndParse"](entry, self.bioData)
                         self.checkForNearest(self.bioData)
 
                     # if we have all data, leave loop
@@ -763,10 +763,6 @@ def calculateAlarmLevel(wasteDate):
 def scanAndParse(entry, wasteData: WasteData):
     image = None
     now = datetime.now().date()
-    try:
-        image = tag.find("img")
-    except Exception as e:
-        pass
     if (
         wasteData.isEmpty()
         and entry['category'] == wasteData.category 
