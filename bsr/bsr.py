@@ -418,16 +418,16 @@ class Bsr(BlzHelperInterface):
             key=lambda x: x.wasteDate if x and x.wasteDate else datetime.max.date()
         )
         for obj in customObjects:
-        if obj is None or obj.wasteDate is None:
-           continue
+            if obj is None or obj.wasteDate is None:
+                continue
 
-        text = obj.getLongStatus().strip()
+            text = obj.getLongStatus().strip()
 
-        # nur echte Inhalte übernehmen
-        if text:
-            lines.append(text)
+            # nur echte Inhalte übernehmen
+            if text:
+                lines.append(text)
         if not lines:
-        return "Keine Termine gefunden"
+            return "Keine Termine gefunden"
 
         return seperator.join(lines)
 
