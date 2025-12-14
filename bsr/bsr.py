@@ -1,7 +1,6 @@
 # moved logic of to extra class
 import re
-import datetime as dt
-from datetime import timedelta
+from datetime import datetime, timedelta
 from time import mktime
 import time as myTime
 
@@ -368,15 +367,15 @@ class Bsr(BlzHelperInterface):
         Arguments:
             dt {WasteData} -- the data to verify
         """
-        now = dt.datetime.now().date()
+        now = datetime.now().date()
         if dt is None or dt.getDate() is None:
             return
-        h = dt.datetime.now().hour
-        d = dt.datetime.now().date()
+        h = datetime.now().hour
+        d = datetime.now().date()
         if (
-            dt.getDate() == dt.datetime.now().date()
-            and dt.datetime.now().hour < BSR_HOUR_THRESHOLD
-        ) or dt.getDate() > dt.datetime.now().date():
+            dt.getDate() == datetime.now().date()
+            and datetime.now().hour < BSR_HOUR_THRESHOLD
+        ) or dt.getDate() > datetime.now().date():
 
             if self.nearest is None:
                 self.nearest = dt
