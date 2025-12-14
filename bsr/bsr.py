@@ -23,6 +23,7 @@ except ImportError:
 from blz.blzHelperInterface import BlzHelperInterface
 
 import sys
+import traceback
 
 # sys.path
 # sys.path.append('/volume1/@appstore/py3k/usr/local/lib/python3.5/site-packages')
@@ -717,9 +718,10 @@ class Bsr(BlzHelperInterface):
             #             break
             # only set last Update time if success
             self.lastUpdate = datetime.now()
-        except (Exception) as e:
-            Domoticz.Error("Error: {} used paths: {} ".format(e, sys.path))
-            self.setError(e)
+        except Exception as e:
+            Domoticz.Error("BSR EXCEPTION: {}".format(e))
+            Domoticz.Error("BSR TRACEBACK:\n{}".format(traceback.format_exc()))
+            self.setError(str(e))
             return
 
 
