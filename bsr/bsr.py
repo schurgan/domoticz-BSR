@@ -640,7 +640,6 @@ class Bsr(BlzHelperInterface):
                             "date": date_str,
                             "category": category,
                             "entry": entry
-
                         })
                         continue
                     import sys
@@ -653,9 +652,8 @@ class Bsr(BlzHelperInterface):
                     from datetime import date as _date
 
       # robustes Parsen ohne datetime.strptime (stabil bei Plugin-Restarts)
-                   t = myTime.strptime(service_date_str, "%d.%m.%Y")
-                   service_date = _date(t.tm_year, t.tm_mon, t.tm_mday)
-
+                    t = myTime.strptime(service_date_str, "%d.%m.%Y")
+                    service_date = _date(t.tm_year, t.tm_mon, t.tm_mday)
                     if service_date <= now:
                         invalid_entries.append({
                             "reason": "serviceDate_actual not in future",
