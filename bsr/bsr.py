@@ -657,16 +657,16 @@ class Bsr(BlzHelperInterface):
                     from datetime import date as _date
 
         # robustes Parsen ohne datetime.strptime (stabil bei Plugin-Restarts)
-        t = myTime.strptime(service_date_str, "%d.%m.%Y")
-        service_date = _date(t.tm_year, t.tm_mon, t.tm_mday)
+            t = myTime.strptime(service_date_str, "%d.%m.%Y")
+            service_date = _date(t.tm_year, t.tm_mon, t.tm_mday)
 
         # Termine in der Vergangenheit immer verwerfen
-        if service_date < now:
-            continue
+            if service_date < now:
+                continue
 
         # Heute nur bis zur Uhrzeit-Schwelle gültig
-        if service_date == now and datetime.now().hour >= BSR_HOUR_THRESHOLD:
-            continue
+            if service_date == now and datetime.now().hour >= BSR_HOUR_THRESHOLD:
+                continue
 
                     # take  care about it:
                     if self.showHouseholdWaste is True:
