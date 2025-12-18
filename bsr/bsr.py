@@ -647,9 +647,6 @@ class Bsr(BlzHelperInterface):
                             "entry": entry
                         })
                         continue
-                    import sys
-                    import importlib
-
         # datetime kann beim Plugin-Restart "vergiftet" sein -> neu laden
                     if "datetime" in sys.modules and sys.modules["datetime"] is None:
                         del sys.modules["datetime"]
