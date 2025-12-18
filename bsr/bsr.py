@@ -648,21 +648,23 @@ class Bsr(BlzHelperInterface):
                         })
                         continue
         # datetime kann beim Plugin-Restart "vergiftet" sein -> neu laden
-                    if "datetime" in sys.modules and sys.modules["datetime"] is None:
-                        del sys.modules["datetime"]
+                    #if "datetime" in sys.modules and sys.modules["datetime"] is None:      ggf. löschen
+                        #del sys.modules["datetime"]                                        ggf. löschen
 
-                    from datetime import date as _date
+                    #from datetime import date as _date                                     ggf. löschen
 
         # robustes Parsen ohne datetime.strptime (stabil bei Plugin-Restarts)
                     t = myTime.strptime(service_date_str, "%d.%m.%Y")
-                    service_date = _date(t.tm_year, t.tm_mon, t.tm_mday)
+                    service_date = dtime.date(t.tm_year, t.tm_mon, t.tm_mday)
+                    #service_date = _date(t.tm_year, t.tm_mon, t.tm_mday)                   ggf. löschen
 
         # Termine in der Vergangenheit immer verwerfen
                     if service_date < now:
                         continue
 
         # Heute nur bis zur Uhrzeit-Schwelle gültig
-                    if service_date == now and datetime.now().hour >= BSR_HOUR_THRESHOLD:
+                    #if service_date == now and datetime.now().hour >= BSR_HOUR_THRESHOLD:    ggf. löschen
+                    if service_date == now and dtime.datetime.now().hour >= BSR_HOUR_THRESHOLD:
                         continue
 
                     # take  care about it:
