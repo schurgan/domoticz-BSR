@@ -603,6 +603,11 @@ class Bsr(BlzHelperInterface):
         """
 
         try:
+            # Wichtig: bei jedem Poll alten Zustand verwerfen,
+            # sonst bleibt "nearest" nach einem abgelaufenen Termin hängen.
+            self.nearest = None
+            self.reinitData()   # setzt rest/recycle/bio/xmas auf leer
+            self.needUpdate = True
             # Domoticz.Debug('Retrieve waste collection data from ' + self.bsrUrl)
             r = self.requestWasteData()
             # Today (just date, no time part)
@@ -645,23 +650,23 @@ class Bsr(BlzHelperInterface):
                     import sys
                     import importlib
 
-      # datetime kann beim Plugin-Restart "vergiftet" sein -> neu laden
+        # datetime kann beim Plugin-Restart "vergiftet" sein -> neu laden
                     if "datetime" in sys.modules and sys.modules["datetime"] is None:
                         del sys.modules["datetime"]
 
                     from datetime import date as _date
 
-      # robustes Parsen ohne datetime.strptime (stabil bei Plugin-Restarts)
-                    t = myTime.strptime(service_date_str, "%d.%m.%Y")
-                    service_date = _date(t.tm_year, t.tm_mon, t.tm_mday)
-                    if service_date <= now:
-                        invalid_entries.append({
-                            "reason": "serviceDate_actual not in future",
-                            "date": date_str,
-                            "category": category,
-                            "entry": entry
-                        })
-                        continue
+        # robustes Parsen ohne datetime.strptime (stabil bei Plugin-Restarts)
+        t = myTime.strptime(service_date_str, "%d.%m.%Y")
+        service_date = _date(t.tm_year, t.tm_mon, t.tm_mday)
+
+        # Termine in der Vergangenheit immer verwerfen
+        if service_date < now:
+            continue
+
+        # Heute nur bis zur Uhrzeit-Schwelle gültig
+        if service_date == now and datetime.now().hour >= BSR_HOUR_THRESHOLD:
+            continue
 
                     # take  care about it:
                     if self.showHouseholdWaste is True:
