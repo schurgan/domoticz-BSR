@@ -157,7 +157,10 @@ class WasteData:
         if color:
             type_text = "<span style='color:{};'>{}</span>".format(color, type_text)
 
-        hint_text = "" if self.wasteHint is None else "(" + self.wasteHint + ")"
+        if self.wasteHint:
+            hint_text = "(" + self.wasteHint + ")"
+        else:
+            hint_text = ""
 
         return "{} {} {} {}".format(d, i, type_text, hint_text)
 
