@@ -124,28 +124,65 @@ class WasteData:
             )
         return i
 
-    def getLongStatus(self):
-        """status information for this waste data.
-        format (date) [optional image] (type) (hint)
+        def getLongStatus(self):
+            """status information for this waste data.
+            format (date) [optional image] (type) (hint)
 
-        Returns:
-            str -- the status as text/html
-        """
+            Returns:
+                str -- the status as text/html
+            """
 
-        d = "- kein -"
-        i = ""
-        if self.wasteDate is not None:
-            # d = "{:%Y-%b-%d %a}: ".format(self.wasteDate)
-            # use german format
-            d = "{:%d.%m.%Y %a}: ".format(self.wasteDate)
-        if self.wasteImage is not None and SHOW_ICON_IN_DETAIL is True:
-            i = self.getImageTag(14)
-        return "{} {} {} {}".format(
-            d,
-            i,
-            self.getTypeLongName(),
-            "(" + self.wasteHint + ")" if self.wasteHint else "",
-        )
+            d = "- kein -"
+            i = ""
+           if self.wasteDate is not None:
+                # use german format
+                d = "{:%d.%m.%Y %a}: ".format(self.wasteDate)
+            if self.wasteImage is not None and SHOW_ICON_IN_DETAIL is True:
+                i = self.getImageTag(14)
+
+            # Typenname holen (Biogut, Wertstoffe, Hausmüll…)
+            type_text = self.getTypeLongName()
+
+            # Farbe je nach Kategorie setzen
+            try:
+                from bsr.bsr import Bsr  # zyklische Imports vermeiden Domoticz-Fehler
+            except ImportError:
+                Bsr = None
+
+            if Bsr is not None:
+                color = Bsr.category_colors.get(self.category)
+            else:
+                color = None
+
+            if color:
+                type_text = "<span style='color:{};'>{}</span>".format(color, type_text)
+
+            hint_text = "" if self.wasteHint is None else "(" + self.wasteHint + ")"
+
+            return "{} {} {} {}".format(d, i, type_text, hint_text)
+
+    ##def getLongStatus(self):
+        ##"""status information for this waste data.
+        ##format (date) [optional image] (type) (hint)
+
+        ##Returns:
+            ##str -- the status as text/html
+        ##"""
+
+        ##d = "- kein -"
+        ##i = ""
+        ##if self.wasteDate is not None:
+            ### d = "{:%Y-%b-%d %a}: ".format(self.wasteDate)
+            ### use german format
+            ##d = "{:%d.%m.%Y %a}: ".format(self.wasteDate)
+        ##if self.wasteImage is not None and SHOW_ICON_IN_DETAIL is True:
+            ##i = self.getImageTag(14)
+        ##return "{} {} {} {}".format(
+            ##d,
+            ##i,
+            ##self.getTypeLongName(),
+            ##"(" + self.wasteHint + ")" if self.wasteHint else "",
+        ##)
 
     def isComplete(self):
         """if date is present this data is complete.
@@ -171,6 +208,13 @@ class Bsr(BlzHelperInterface):
     HOUSEHOLD_CAT: "Hausmüll",
     XMASTREE_CAT: "Weihnachtsbaum"
 }
+    # NEU: Farben für die Ausgabe
+    category_colors = {
+        BIO_CAT: "green",      # Biogut
+        RECYCLE_CAT: "yellow", # Wertstoffe 
+        HOUSEHOLD_CAT: "black",   #Hausmüll
+        XMASTREE_CAT: "darkgreen",   #Weihnachtbaum
+    }
 
     def __init__(
         self,
