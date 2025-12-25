@@ -379,29 +379,75 @@ class Bsr(BlzHelperInterface):
         return s
 
     def getDeviceName(self):
-        """calculates a name based on nearest waste element
-        form: [image optional] (waste type) (days till collection)
-
-        Returns:
-            {str} -- name as string
+        """Name basierend auf allen Abfallarten am nächsten Termin.
+        Beispiel: 'Hausmüll und Biogut (3 Tage)'
         """
 
         s = "No Data"
-        if self.nearest is not None:
-            dt = self.getNearestDate()
-            lvl = calculateAlarmLevel(dt)
-            days = lvl[1]
-            img = ""
-            if SHOW_ICON_IN_NAME is True:
-                img = "{}".format(self.nearest.getImageTag("22", "0", "top"))
-            t = self.nearest.getTypeLongName()
-            # remove () from type to keep title short
-            t = re.sub("[\(\[].*?[\)\]]", "", t)
-            s = "{} {} {}".format(img, t, lvl[1])
+        if self.hasError:
+            return "!Error!"
 
-        if self.hasError is True:
-            s = "!Error!"
+        if self.nearest is None or self.nearest.getDate() is None:
+            return s
+
+        nearest_date = self.getNearestDate()
+
+        # Alle Objekte, die an diesem Datum abgeholt werden
+        same_day = []
+        for obj in (self.restData, self.recycleData, self.bioData, self.xmasData):
+            if obj and obj.getDate() == nearest_date:
+                same_day.append(obj.getTypeLongName())
+
+        # Doppelte entfernen, Reihenfolge beibehalten
+        seen = set()
+        unique_types = []
+        for t in same_day:
+            if t not in seen:
+                seen.add(t)
+                unique_types.append(t)
+
+        if not unique_types:
+            # Fallback: alter Mechanismus
+            t = self.nearest.getTypeLongName()
+        else:
+            t = " und ".join(unique_types)
+
+        # Klammern o.ä. aus dem Namen rausnehmen, damit der Titel kurz bleibt
+        t = re.sub(r"[\(\[].*?[\)\]]", "", t).strip()
+
+        # Tage-Text holen (z.B. '(3 Tage)', '(Morgen!)' etc.)
+        lvl = calculateAlarmLevel(nearest_date)
+        days_txt = lvl[1]
+
+        # Kein HTML im Gerätenamen, nur Text
+        s = "{} {}".format(t, days_txt).strip()
+
         return s
+    
+    ##def getDeviceName(self):
+        ##"""calculates a name based on nearest waste element
+        ##form: [image optional] (waste type) (days till collection)
+
+        ##Returns:
+            ##{str} -- name as string
+        ##"""
+
+        ##s = "No Data"
+        ##if self.nearest is not None:
+            ##dt = self.getNearestDate()
+            ##lvl = calculateAlarmLevel(dt)
+            ##days = lvl[1]
+            ##img = ""
+            ##if SHOW_ICON_IN_NAME is True:
+                ##img = "{}".format(self.nearest.getImageTag("22", "0", "top"))
+            ##t = self.nearest.getTypeLongName()
+            ### remove () from type to keep title short
+            ##t = re.sub("[\(\[].*?[\)\]]", "", t)
+            ##s = "{} {} {}".format(img, t, lvl[1])
+
+        ##if self.hasError is True:
+            ##s = "!Error!"
+        ##return s
 
     def getNearestDate(self):
         d = None
@@ -446,9 +492,10 @@ class Bsr(BlzHelperInterface):
             return False
 
     def getSummary(self, seperator: str = "<br>"):
+        from collections import defaultdict
+        from datetime import date as _date
 
         customObjects = []
-        lines = []
 
         if self.showHouseholdWaste:
             customObjects.append(self.restData)
@@ -456,24 +503,105 @@ class Bsr(BlzHelperInterface):
             customObjects.append(self.recycleData)
         if self.showBioWaste:
             customObjects.append(self.bioData)
-        if self.showXmasWaste is True and self.timeToShowXms() is True:
+        if self.showXmasWaste and self.timeToShowXms():
             customObjects.append(self.xmasData)
 
-        # Leere Einträge ans Ende sortieren
-        from datetime import date as _date
-        customObjects.sort(
-            key=lambda x: x.wasteDate if (x and x.wasteDate) else _date(2999, 1, 1),
-            reverse=False,
-        )
+        # Leere ausschließen & sortieren
+        customObjects = [o for o in customObjects if o.wasteDate]
+        customObjects.sort(key=lambda x: x.wasteDate)
 
+        grouped = defaultdict(list)
         for obj in customObjects:
-            # Leere Einträge komplett ausblenden
-            if obj is None or obj.wasteDate is None:
-                continue
+            grouped[obj.wasteDate].append(obj)
 
-            text = obj.getLongStatus().strip()
-            if text:
-                lines.append(text)
+        lines = []
+        for date_key in sorted(grouped.keys()):
+            objs = grouped[date_key]
+
+            # Datum formatieren
+            date_str = date_key.strftime("%d.%m.%Y %a")
+
+            # Typen farbig rendern
+            type_parts = []
+            for o in objs:
+                color = Bsr.category_colors.get(o.category, None)
+                name = o.getTypeLongName()
+                if color:
+                    type_parts.append(f"<span style='color:{color};font-weight:bold;'>{name}</span>")
+                else:
+                    type_parts.append(name)
+
+            types_joined = " und ".join(type_parts)
+
+            # Hinweise (falls vorhanden)
+            hints = [f"({o.getHint()})" for o in objs if o.getHint()]
+            hint_str = " ".join(hints)
+
+            lines.append(f"{date_str}: {types_joined} {hint_str}".strip())
+
+        return seperator.join(lines) if lines else "Keine Termine gefunden"
+
+    
+    ##def getSummary(self, seperator: str = "<br>"):
+
+        ##customObjects = []
+        ##lines = []
+
+        ##if self.showHouseholdWaste:
+            ##customObjects.append(self.restData)
+        ##if self.showRecycleWaste:
+            ##customObjects.append(self.recycleData)
+        ##if self.showBioWaste:
+            ##customObjects.append(self.bioData)
+        ##if self.showXmasWaste is True and self.timeToShowXms() is True:
+            ##customObjects.append(self.xmasData)
+
+        ### Leere Einträge ans Ende sortieren
+        ##from datetime import date as _date
+        ##customObjects.sort(
+            ##key=lambda x: x.wasteDate if (x and x.wasteDate) else _date(2999, 1, 1),
+            ##reverse=False,
+        ##)
+
+        ### --- Gruppierung nach Datum ---
+        ##from collections import defaultdict
+        ##grouped = defaultdict(list)
+
+        ##for obj in customObjects:
+            ##if obj and obj.wasteDate:
+                ##grouped[obj.wasteDate].append(obj)
+
+        ##lines = []
+        ##for date_key in sorted(grouped.keys()):
+            ##objs = grouped[date_key]
+
+            ### Datum einmal formatieren
+            ##date_str = date_key.strftime("%d.%m.%Y %a")
+
+            ### Mehrere Typen zusammenführen, Farben bleiben erhalten
+            ##types_joined = " und ".join([o.getTypeLongName() for o in objs])
+
+            ### Hinweise (optional)
+            ##hints = [f"({o.getHint()})" for o in objs if o.getHint()]
+            ##hint_str = " ".join(hints)
+
+            ##line = f"{date_str}: {types_joined} {hint_str}".strip()
+            ##lines.append(line)
+
+        ##if not lines:
+            ##return "Keine Termine gefunden"
+
+        ##return "<br>".join(lines)
+
+        
+        ##for obj in customObjects:
+            ### Leere Einträge komplett ausblenden
+            ##if obj is None or obj.wasteDate is None:
+                ##continue
+
+            ##text = obj.getLongStatus().strip()
+            ##if text:
+                ##lines.append(text)
 
         if not lines:
             return "Keine Termine gefunden"
