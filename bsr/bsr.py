@@ -124,42 +124,42 @@ class WasteData:
             )
         return i
 
-        def getLongStatus(self):
-            """status information for this waste data.
-            format (date) [optional image] (type) (hint)
+    def getLongStatus(self):
+        """status information for this waste data.
+        format (date) [optional image] (type) (hint)
 
-            Returns:
-                str -- the status as text/html
-            """
+        Returns:
+            str -- the status as text/html
+        """
 
-            d = "- kein -"
-            i = ""
-           if self.wasteDate is not None:
-                # use german format
-                d = "{:%d.%m.%Y %a}: ".format(self.wasteDate)
-            if self.wasteImage is not None and SHOW_ICON_IN_DETAIL is True:
-                i = self.getImageTag(14)
+        d = "- kein -"
+        i = ""
+        if self.wasteDate is not None:
+            # use german format
+            d = "{:%d.%m.%Y %a}: ".format(self.wasteDate)
+        if self.wasteImage is not None and SHOW_ICON_IN_DETAIL is True:
+            i = self.getImageTag(14)
 
-            # Typenname holen (Biogut, Wertstoffe, Hausmüll…)
-            type_text = self.getTypeLongName()
+        # Typenname holen (Biogut, Wertstoffe, Hausmüll…)
+        type_text = self.getTypeLongName()
 
-            # Farbe je nach Kategorie setzen
-            try:
-                from bsr.bsr import Bsr  # zyklische Imports vermeiden Domoticz-Fehler
-            except ImportError:
-                Bsr = None
+        # Farbe je nach Kategorie setzen
+        try:
+            from bsr.bsr import Bsr  # zyklische Imports vermeiden Domoticz-Fehler
+        except ImportError:
+            Bsr = None
 
-            if Bsr is not None:
-                color = Bsr.category_colors.get(self.category)
-            else:
-                color = None
+        if Bsr is not None:
+            color = Bsr.category_colors.get(self.category)
+        else:
+            color = None
 
-            if color:
-                type_text = "<span style='color:{};'>{}</span>".format(color, type_text)
+        if color:
+            type_text = "<span style='color:{};'>{}</span>".format(color, type_text)
 
-            hint_text = "" if self.wasteHint is None else "(" + self.wasteHint + ")"
+        hint_text = "" if self.wasteHint is None else "(" + self.wasteHint + ")"
 
-            return "{} {} {} {}".format(d, i, type_text, hint_text)
+        return "{} {} {} {}".format(d, i, type_text, hint_text)
 
     ##def getLongStatus(self):
         ##"""status information for this waste data.
