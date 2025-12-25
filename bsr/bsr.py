@@ -211,7 +211,7 @@ class Bsr(BlzHelperInterface):
     # NEU: Farben für die Ausgabe
     category_colors = {
         BIO_CAT: "green",      # Biogut
-        RECYCLE_CAT: "yellow", # Wertstoffe 
+        RECYCLE_CAT: "orange", # Wertstoffe 
         HOUSEHOLD_CAT: "black",   #Hausmüll
         XMASTREE_CAT: "darkgreen",   #Weihnachtbaum
     }
