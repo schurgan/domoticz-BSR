@@ -718,6 +718,7 @@ class Bsr(BlzHelperInterface):
                     if self.showHouseholdWaste is True:
                         scanAndParse(entry, self.restData)
                         self.checkForNearest(self.restData)
+                    
                     if self.showRecycleWaste is True:
                         scanAndParse(entry, self.recycleData)
                         self.checkForNearest(self.recycleData)
@@ -725,12 +726,17 @@ class Bsr(BlzHelperInterface):
                     if self.showBioWaste is True:
                         scanAndParse(entry, self.bioData)
                         self.checkForNearest(self.bioData)
+                    
+                    if self.showXmasWaste and self.timeToShowXms():
+                        scanAndParse(entry, self.xmasData)
+                        self.checkForNearest(self.xmasData)
 
                     # if we have all data, leave loop
                     if (
                         self.restData.isComplete() is True
                         and self.recycleData.isComplete() is True
                         and self.bioData.isComplete() is True
+                        and (not self.showXmasWaste or self.xmasData.isComplete())
                     ):
                         break
             Domoticz.Log(
