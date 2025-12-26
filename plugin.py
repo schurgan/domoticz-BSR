@@ -24,7 +24,7 @@ Version:    1.0.0: Initial Version
 
 <plugin key="BsrWasteCollection"
 name="BSR - Berlin Waste Collection" author="belze/schurgan/ChatGPT"
-version="3.0.0" wikilink="" externallink="https://github.com/schurgan/domoticz-BSR" >
+version="3.0.1" wikilink="" externallink="https://github.com/schurgan/domoticz-BSR" >
     <description>
         <h2>BSR - Berlin Waste Collection Plugin</h2><br/>
         <h3>Features</h3>
