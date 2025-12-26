@@ -20,10 +20,11 @@ Version:    1.0.0: Initial Version
             1.1.7: bugfix, forgot to clear data storage before reading them from webservice
             2.0.0: rebuild project structure and parameters
             3.0.0: changed to new webpage form BSR
+            3.0.1: 
 
 <plugin key="BsrWasteCollection"
-name="BSR - Berlin Waste Collection" author="belze"
-version="3.0.0" wikilink="" externallink="https://github.com/belzetrigger/domoticz-BSR" >
+name="BSR - Berlin Waste Collection" author="belze/schurgan/ChatGPT"
+version="3.0.0" wikilink="" externallink="https://github.com/schurgan/domoticz-BSR" >
     <description>
         <h2>BSR - Berlin Waste Collection Plugin</h2><br/>
         <h3>Features</h3>
@@ -86,11 +87,6 @@ import sys
 import traceback
 
 sys.path
-# synlogy
-# sys.path.append('/volume1/@appstore/py3k/usr/local/lib/python3.5/site-packages')
-# windows
-# sys.path.append('C:\\Program Files (x86)\\Python37-32\\Lib\\site-packages')
-
 try:
     import Domoticz  # pylint: disable=import-error # nopep8
 except ImportError:
