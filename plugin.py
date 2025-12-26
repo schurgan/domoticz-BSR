@@ -20,7 +20,7 @@ Version:    1.0.0: Initial Version
             1.1.7: bugfix, forgot to clear data storage before reading them from webservice
             2.0.0: rebuild project structure and parameters
             3.0.0: changed to new webpage form BSR
-            3.0.1: 
+            3.0.1: Kleine Schönheitskorrekturen
 
 <plugin key="BsrWasteCollection"
 name="BSR - Berlin Waste Collection" author="belze/schurgan/ChatGPT"
