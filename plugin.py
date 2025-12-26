@@ -5,7 +5,7 @@
 """
 Bsr Waste Collection Date Reader Plugin
 
-Author: Belze(2021)
+Authoren: Belze schurgan ChatGPT(12.2025)
 
 
 Version:    1.0.0: Initial Version
