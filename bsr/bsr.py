@@ -9,13 +9,6 @@ import time as myTime
 from urllib.parse import quote, quote_plus
 import os
 
-# import locale, breaks domoticz on synology ...
-# try:
-#    locale.setlocale(locale.LC_ALL, "de_DE.utf8")
-#    # locale.setlocale(locale.LC_TIME, "de") # german
-# except locale.Error:
-#    Domoticz.Error("Cannot set locale.")
-
 try:
     import Domoticz #python.analysis.warnings:
 except ImportError:
@@ -25,10 +18,6 @@ from blz.blzHelperInterface import BlzHelperInterface
 
 import sys
 import traceback
-
-# sys.path
-# sys.path.append('/volume1/@appstore/py3k/usr/local/lib/python3.5/site-packages')
-# sys.path.append('C:\\Program Files (x86)\\Python37-32\\Lib\\site-packages')
 
 try:
     from bs4 import BeautifulSoup
@@ -113,8 +102,6 @@ class WasteData:
             {str} -- html image tag
         """
         i = ""
-        # we do it in non proper way. Otherwise Update Name will fail on Domoticz.
-        # "src='sdsd' foo bar --> leads to invalid sql"
         if self.wasteImage is not None:
             i = (
                 "<img src=https://www.bsr.de{} "
@@ -163,29 +150,6 @@ class WasteData:
             hint_text = ""
 
         return "{} {} {} {}".format(d, i, type_text, hint_text)
-
-    ##def getLongStatus(self):
-        ##"""status information for this waste data.
-        ##format (date) [optional image] (type) (hint)
-
-        ##Returns:
-            ##str -- the status as text/html
-        ##"""
-
-        ##d = "- kein -"
-        ##i = ""
-        ##if self.wasteDate is not None:
-            ### d = "{:%Y-%b-%d %a}: ".format(self.wasteDate)
-            ### use german format
-            ##d = "{:%d.%m.%Y %a}: ".format(self.wasteDate)
-        ##if self.wasteImage is not None and SHOW_ICON_IN_DETAIL is True:
-            ##i = self.getImageTag(14)
-        ##return "{} {} {} {}".format(
-            ##d,
-            ##i,
-            ##self.getTypeLongName(),
-            ##"(" + self.wasteHint + ")" if self.wasteHint else "",
-        ##)
 
     def isComplete(self):
         """if date is present this data is complete.
@@ -424,31 +388,6 @@ class Bsr(BlzHelperInterface):
 
         return s
     
-    ##def getDeviceName(self):
-        ##"""calculates a name based on nearest waste element
-        ##form: [image optional] (waste type) (days till collection)
-
-        ##Returns:
-            ##{str} -- name as string
-        ##"""
-
-        ##s = "No Data"
-        ##if self.nearest is not None:
-            ##dt = self.getNearestDate()
-            ##lvl = calculateAlarmLevel(dt)
-            ##days = lvl[1]
-            ##img = ""
-            ##if SHOW_ICON_IN_NAME is True:
-                ##img = "{}".format(self.nearest.getImageTag("22", "0", "top"))
-            ##t = self.nearest.getTypeLongName()
-            ### remove () from type to keep title short
-            ##t = re.sub("[\(\[].*?[\)\]]", "", t)
-            ##s = "{} {} {}".format(img, t, lvl[1])
-
-        ##if self.hasError is True:
-            ##s = "!Error!"
-        ##return s
-
     def getNearestDate(self):
         d = None
         if self.nearest is not None:
@@ -540,68 +479,6 @@ class Bsr(BlzHelperInterface):
             lines.append(f"{date_str}: {types_joined} {hint_str}".strip())
 
         return seperator.join(lines) if lines else "Keine Termine gefunden"
-
-    
-    ##def getSummary(self, seperator: str = "<br>"):
-
-        ##customObjects = []
-        ##lines = []
-
-        ##if self.showHouseholdWaste:
-            ##customObjects.append(self.restData)
-        ##if self.showRecycleWaste:
-            ##customObjects.append(self.recycleData)
-        ##if self.showBioWaste:
-            ##customObjects.append(self.bioData)
-        ##if self.showXmasWaste is True and self.timeToShowXms() is True:
-            ##customObjects.append(self.xmasData)
-
-        ### Leere Einträge ans Ende sortieren
-        ##from datetime import date as _date
-        ##customObjects.sort(
-            ##key=lambda x: x.wasteDate if (x and x.wasteDate) else _date(2999, 1, 1),
-            ##reverse=False,
-        ##)
-
-        ### --- Gruppierung nach Datum ---
-        ##from collections import defaultdict
-        ##grouped = defaultdict(list)
-
-        ##for obj in customObjects:
-            ##if obj and obj.wasteDate:
-                ##grouped[obj.wasteDate].append(obj)
-
-        ##lines = []
-        ##for date_key in sorted(grouped.keys()):
-            ##objs = grouped[date_key]
-
-            ### Datum einmal formatieren
-            ##date_str = date_key.strftime("%d.%m.%Y %a")
-
-            ### Mehrere Typen zusammenführen, Farben bleiben erhalten
-            ##types_joined = " und ".join([o.getTypeLongName() for o in objs])
-
-            ### Hinweise (optional)
-            ##hints = [f"({o.getHint()})" for o in objs if o.getHint()]
-            ##hint_str = " ".join(hints)
-
-            ##line = f"{date_str}: {types_joined} {hint_str}".strip()
-            ##lines.append(line)
-
-        ##if not lines:
-            ##return "Keine Termine gefunden"
-
-        ##return "<br>".join(lines)
-
-        
-        ##for obj in customObjects:
-            ### Leere Einträge komplett ausblenden
-            ##if obj is None or obj.wasteDate is None:
-                ##continue
-
-            ##text = obj.getLongStatus().strip()
-            ##if text:
-                ##lines.append(text)
 
         if not lines:
             return "Keine Termine gefunden"
@@ -822,12 +699,6 @@ class Bsr(BlzHelperInterface):
                             "entry": entry
                         })
                         continue
-        # datetime kann beim Plugin-Restart "vergiftet" sein -> neu laden
-                    #if "datetime" in sys.modules and sys.modules["datetime"] is None:      ggf. löschen
-                        #del sys.modules["datetime"]                                        ggf. löschen
-
-                    #from datetime import date as _date                                     ggf. löschen
-
         # robustes Parsen ohne datetime.strptime (stabil bei Plugin-Restarts)
                     t = myTime.strptime(service_date_str, "%d.%m.%Y")
                     service_date = dtime.date(t.tm_year, t.tm_mon, t.tm_mday)
@@ -890,26 +761,6 @@ class Bsr(BlzHelperInterface):
                 raise Exception("Could not load data - verify settings")
             else:
                 self.resetError()
-                # reset data store
-                # self.initWasteDate()
-                # do not reset, we just got fresh data ... self.reset()
-            
-            # TODO
-            # if self.showXmasWaste and self.timeToShowXms() is True:
-            #     Domoticz.Debug("BSR: #5.1 Read Xmas Data")
-            #     rXmas = self.requestWasteData(xMas=True)
-            #     Domoticz.Debug("BSR: #5.2 Parse Data (without Xmas")
-            #     if self.debugResponse is True:
-            #         Domoticz.Debug("data: {}".format(rXmas.content))
-            #     soup = BeautifulSoup(rXmas.content, "html.parser")
-
-            #     for xmasTag in soup.find_all("li"):
-            #         scanAndParse(xmasTag, self.xmasData)
-            #         self.checkForNearest(self.xmasData)
-
-            #         if self.xmasData.isComplete() is True:
-            #             break
-            # only set last Update time if success
             self.lastUpdate = dtime.datetime.now()
         except Exception as e:
             Domoticz.Error("BSR EXCEPTION: {}".format(e))
@@ -1060,22 +911,3 @@ def convert4Query(parameter: str):
     """
     s = quote_plus(parameter)
     return s
-    # return parameter.replace(",", "%2C").replace(" ", "+")
-
-
-# def verifyBS4():
-#     if(moduleLoaded('bs4') is False):
-#         try:
-#             from bs4 import BeautifulSoup
-#         except Exception as e:
-#             Domoticz.Error("Error import BeautifulSoup".format(e))
-
-
-# def moduleLoaded(modulename: str):
-#     import sys
-#     if modulename not in sys.modules:
-#         Domoticz.Error('{} not imported'.format(modulename))
-#         return False
-#     else:
-#         Domoticz.Debug('{}: {}'.format(modulename, sys.modules[modulename]))
-#         return True
