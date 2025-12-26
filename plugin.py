@@ -1,6 +1,6 @@
 # plugin for displaying waste collections date from berlins waste company
 #
-# Author: belze
+# Authoren: Belze schurgan ChatGPT(12.2025)
 #
 """
 Bsr Waste Collection Date Reader Plugin
