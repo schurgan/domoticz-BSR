@@ -713,22 +713,44 @@ class Bsr(BlzHelperInterface):
                     if service_date == now and dtime.datetime.now().hour >= BSR_HOUR_THRESHOLD:
                         continue
 
-                    # take  care about it:
-                    if self.showHouseholdWaste is True:
+                    # take care about it: je nach Kategorie in das passende Objekt schreiben
+                    if self.showHouseholdWaste and category == Bsr.HOUSEHOLD_CAT:
                         scanAndParse(entry, self.restData)
                         self.checkForNearest(self.restData)
-                    
-                    if self.showRecycleWaste is True:
+
+                    if self.showRecycleWaste and category == Bsr.RECYCLE_CAT:
                         scanAndParse(entry, self.recycleData)
                         self.checkForNearest(self.recycleData)
 
-                    if self.showBioWaste is True:
+                    if self.showBioWaste and category == Bsr.BIO_CAT:
                         scanAndParse(entry, self.bioData)
                         self.checkForNearest(self.bioData)
-                    
-                    if self.showXmasWaste and self.timeToShowXms():
+
+                    # Weihnachtsbaum (LT)
+                    if (
+                        self.showXmasWaste
+                        and self.timeToShowXms()
+                        and category == Bsr.XMASTREE_CAT
+                    ):
                         scanAndParse(entry, self.xmasData)
                         self.checkForNearest(self.xmasData)
+                    
+                    ### take  care about it:
+                    ##if self.showHouseholdWaste is True:
+                        ##scanAndParse(entry, self.restData)
+                        ##self.checkForNearest(self.restData)
+                    
+                    ##if self.showRecycleWaste is True:
+                        ##scanAndParse(entry, self.recycleData)
+                        ##self.checkForNearest(self.recycleData)
+
+                    ##if self.showBioWaste is True:
+                        ##scanAndParse(entry, self.bioData)
+                        ##self.checkForNearest(self.bioData)
+                    
+                    ##if self.showXmasWaste and self.timeToShowXms():
+                        ##scanAndParse(entry, self.xmasData)
+                        ##self.checkForNearest(self.xmasData)
 
                     # if we have all data, leave loop
                     if (
