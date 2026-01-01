@@ -791,45 +791,86 @@ class Bsr(BlzHelperInterface):
             self.setError(str(e))
             return
 
-
 #############################################################################
 #                       Data specific functions                             #
 #############################################################################
 
-
 def calculateAlarmLevel(wasteDate):
-    """takes an waste element and calculates the domoticz alarm level
+    """Berechnet Alarmlevel basierend auf nächstem Termin.
 
-    Arguments:
-        wasteDate {[type]} -- the element to check
-
-    Returns:
-        [{int}, text ]-- alarm level and text holding the days till date
+    Level-Farben:
+      0 = grau   (kein Termin)
+      1 = grün   (Termin vorhanden, aber noch weit weg)
+      2 = gelb
+      3 = orange
+      4 = rot
     """
 
-    level = 1
-    smallerTxt = ""
-    if wasteDate is not None:
-        delta = wasteDate - dtime.datetime.now().date()
-        # Level = (0=gray, 1=green, 2=yellow, 3=orange, 4=red)
-        if delta.days <= 1:
-            level = 4
-        elif delta.days == 2:
-            level = 3
-        elif delta.days == 3:
-            level = 2
-        else:
-            level = 0
+    # Standard: kein Termin → grau, kein Text
+    if wasteDate is None:
+        return [0, ""]
 
-        if delta.days == 2:
-            smallerTxt = "{} ({})".format(smallerTxt, "Übermorgen")
-        elif delta.days == 1:
-            smallerTxt = "{} ({}!)".format(smallerTxt, "Morgen")
-        elif delta.days == 0:
-            smallerTxt = "{} ({}!!!)".format(smallerTxt, "Heute")
-        else:
-            smallerTxt = "{} ({} Tage)".format(smallerTxt, delta.days)
+    # Es gibt einen Termin → Differenz in Tagen berechnen
+    delta_days = (wasteDate - dtime.datetime.now().date()).days
+
+    # Grundsätzlich: wenn Termin existiert → mindestens grün
+    level = 1
+
+    # Näher kommende Termine einfärben
+    if delta_days <= 1:
+        level = 4       # heute oder morgen → rot
+    elif delta_days == 2:
+        level = 3       # übermorgen → orange
+    elif delta_days == 3:
+        level = 2       # in 3 Tagen → gelb
+    # >3 Tage bleibt level = 1 (grün)
+
+    # Text bauen
+    if delta_days == 2:
+        smallerTxt = " (Übermorgen)"
+    elif delta_days == 1:
+        smallerTxt = " (Morgen!)"
+    elif delta_days == 0:
+        smallerTxt = " (Heute!!!)"
+    else:
+        smallerTxt = " ({} Tage)".format(delta_days)
+
     return [level, smallerTxt]
+
+
+##def calculateAlarmLevel(wasteDate):
+    ##"""takes an waste element and calculates the domoticz alarm level
+
+    ##Arguments:
+        ##wasteDate {[type]} -- the element to check
+
+    ##Returns:
+        ##[{int}, text ]-- alarm level and text holding the days till date
+    ##"""
+
+    ##level = 1
+    ##smallerTxt = ""
+    ##if wasteDate is not None:
+        ##delta = wasteDate - dtime.datetime.now().date()
+        ### Level = (0=gray, 1=green, 2=yellow, 3=orange, 4=red)
+        ##if delta.days <= 1:
+            ##level = 4
+        ##elif delta.days == 2:
+            ##level = 3
+        ##elif delta.days == 3:
+            ##level = 2
+        ##else:
+            ##level = 0
+
+        ##if delta.days == 2:
+            ##smallerTxt = "{} ({})".format(smallerTxt, "Übermorgen")
+        ##elif delta.days == 1:
+            ##smallerTxt = "{} ({}!)".format(smallerTxt, "Morgen")
+        ##elif delta.days == 0:
+            ##smallerTxt = "{} ({}!!!)".format(smallerTxt, "Heute")
+        ##else:
+            ##smallerTxt = "{} ({} Tage)".format(smallerTxt, delta.days)
+    ##return [level, smallerTxt]
 
 
 def scanAndParse(entry, wasteData: WasteData):
