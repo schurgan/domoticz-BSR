@@ -681,14 +681,6 @@ class Bsr(BlzHelperInterface):
                 for entry in entries:
                     category = entry.get("category")
 
-                    # 🔍 DEBUG für Weihnachtsbaum (Kategorie LT)
-                    if category == Bsr.XMASTREE_CAT:
-                        Domoticz.Debug(
-                            "🎄 BSR: LT (Weihnachtsbaum) entdeckt -> {} | {}".format(
-                                date_str, entry.get("serviceDate_actual")
-                            )
-                        )
-                    
                     if category not in valid_categories:
                         invalid_entries.append({
                             "reason": "unknwon category",
