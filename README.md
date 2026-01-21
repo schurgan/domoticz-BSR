@@ -3,7 +3,7 @@
 
 Domoticz plugin that gets data of public waste collection for Berlin from the website of the [Berliner Stadtreinigungsbetriebe](http://www.bsr.de/).
 
-![settings](https://github.com/schurgan/domoticz-BSR/blob/master/resources/meine_version.png)
+![settings](https://github.com/schurgan/domoticz-BSR/blob/master/resources/meine_version)
 
 ## Summary
 This is a virtual hardware plugin that adds information about collecting days  from [bsr.de](https://www.bsr.de/abfuhrkalender-20520.php)  to your [Domoticz](https://www.domoticz.com/) interface. 
