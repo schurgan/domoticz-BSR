@@ -167,7 +167,7 @@ class Bsr(BlzHelperInterface):
     BIO_CAT = "BI"
     RECYCLE_CAT = "WS"
     HOUSEHOLD_CAT = "HM"
-    XMASTREE_CAT = "LT"
+    XMASTREE_CAT = "WB"
 
     category_names = {
     BIO_CAT: "Biogut",
@@ -674,7 +674,7 @@ class Bsr(BlzHelperInterface):
             invalid_entries = []
 
             # Define the valid categories
-            valid_categories = {"HM", "BI", "WS", "LT"}
+            valid_categories = {"HM", "BI", "WS", "WB"}
 
             # Loop through all date entries
             for date_str, entries in r.json()["dates"].items():
