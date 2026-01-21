@@ -32,6 +32,7 @@ except Exception as e:
 SHOW_ICON_IN_NAME = False
 SHOW_ICON_IN_DETAIL = False
 BSR_HOUR_THRESHOLD = 12  # o'clock when it is time to show next date
+WEEKDAY_DE = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"]
 
 
 class WasteData:
@@ -123,7 +124,8 @@ class WasteData:
         i = ""
         if self.wasteDate is not None:
             # use german format
-            d = "{:%d.%m.%Y %a}: ".format(self.wasteDate)
+            d = fmt_date_de(self.wasteDate) + ": "
+            #d = "{:%d.%m.%Y %a}: ".format(self.wasteDate)
         if self.wasteImage is not None and SHOW_ICON_IN_DETAIL is True:
             i = self.getImageTag(14)
 
@@ -458,7 +460,8 @@ class Bsr(BlzHelperInterface):
             objs = grouped[date_key]
 
             # Datum formatieren
-            date_str = date_key.strftime("%d.%m.%Y %a")
+            date_str = fmt_date_de(date_key)
+            #date_str = date_key.strftime("%d.%m.%Y %a")
 
             # Typen farbig rendern
             type_parts = []
@@ -970,3 +973,10 @@ def convert4Query(parameter: str):
     """
     s = quote_plus(parameter)
     return s
+
+def fmt_date_de(d):
+    """
+    Formatiert Datum mit deutschem Wochentag (ohne Locale)
+    Beispiel: 07.01.2026 Mi
+    """
+    return d.strftime("%d.%m.%Y") + " " + WEEKDAY_DE[d.weekday()]
