@@ -480,11 +480,6 @@ class Bsr(BlzHelperInterface):
 
         return seperator.join(lines) if lines else "Keine Termine gefunden"
 
-        if not lines:
-            return "Keine Termine gefunden"
-
-        return seperator.join(lines)
-
     def setError(self, error):
         """sets the error msg and put error flag to True
 
@@ -621,7 +616,7 @@ class Bsr(BlzHelperInterface):
             f"filter=AddrKey%20eq%20%27{relevantNumber}%27%20"
             f"and%20DateFrom%20eq%20datetime%27{date_from_str}%27%20"
             f"and%20DateTo%20eq%20datetime%27{date_to_str}%27%20"
-            f"and%20(Category%20eq%20%27HM%27%20or%20Category%20eq%20%27BI%27%20or%20Category%20eq%20%27WS%27%20or%20Category%20eq%20%27LT%27)"
+            f"and%20(Category%20eq%20%27HM%27%20or%20Category%20eq%20%27BI%27%20or%20Category%20eq%20%27WS%27%20or%20Category%20eq%20%27WB%27)"
         )
 
         headers = {
@@ -727,7 +722,7 @@ class Bsr(BlzHelperInterface):
                         scanAndParse(entry, self.bioData)
                         self.checkForNearest(self.bioData)
 
-                    # Weihnachtsbaum (LT)
+                    # Weihnachtsbaum (WB)
                     if (
                         self.showXmasWaste
                         and self.timeToShowXms()
